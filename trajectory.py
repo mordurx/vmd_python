@@ -21,7 +21,7 @@ class Trajectory:
         self.dcd = dcd
         try:
         
-            Trajectory.molID=molecule.new('new44')
+            Trajectory.molID=molecule.new('new443')
             Trajectory.molID=molecule.load('psf',psf) # load trajectory
             molecule.read(Trajectory.molID,'dcd',dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
             print (Trajectory.molID)
