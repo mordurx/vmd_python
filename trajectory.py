@@ -16,7 +16,7 @@ from sklearn.linear_model import LinearRegression
 class Trajectory:
     
     molID=0
-    def __init__(self, psf,dcd,first=0,last=-1,stride=1,waitfor=-1):
+    def __init__(self,dcd,psf,first=0,last=-1,stride=1,waitfor=-1):
         self.psf = psf
         self.dcd = dcd
         try:
