@@ -22,8 +22,8 @@ class Trajectory:
         try:
         
             Trajectory.molID=molecule.new('new')
-            Trajectory.molID=molecule.load('psf',psf) # load trajectory
-            molecule.read(Trajectory.molID,'dcd',dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
+            Trajectory.molID=molecule.load('psf',self.psf) # load trajectory
+            molecule.read(Trajectory.molID,'dcd',self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
             print (Trajectory.molID)
         except IOError:
             print ("Could not read dcd file or psf:", dcd)
