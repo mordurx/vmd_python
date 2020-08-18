@@ -164,7 +164,15 @@ class Trajectory:
             #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
          
         return vector_radio  
-    
+    def center_mass(self,atomselect1):
+        center_mass=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+        
+            sel = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+            com_mass = np.array(sel1.center(sel1.mass))
+            center_mass.append(com_mass)
+        return center_mass  
     def membrane_center_mass(self,atomselect1):
         membrane_center_mass=[]
         for frame in range(Trajectory.num_frames(self)):
