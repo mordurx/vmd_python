@@ -534,7 +534,7 @@ class Trajectory:
     def rmsf_time(self,atomselect):
         rmsd_array=[]
         
-        
+        reference1 = atomsel(selection=atomselect, molid=Trajectory.molID, frame=1) 
         # use frame 0 for the reference
         reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0) 
         #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
@@ -563,7 +563,16 @@ class Trajectory:
         #newList = map(lambda rmsf: rmsf/int(max(rmsf)), rmsf)
         #rmsf[:]=[rmsf / int(max(rmsf)) for x in rmsf]
         return newList
-   
+    def rmsd_vmd(self,atomselect):
+         rmsd_array=[]
+         # use frame 0 for the reference
+         reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0)
+         reference1 = atomsel(selection=atomselect, molid=Trajectory.molID, frame=1)  
+         x=reference.rmsd(selection=reference1)
+         print (x) 
+         #compare = atomsel(atomselect)
+         #set reference [atomselect $mol "protein" frame 0]
+
     def rmsf_time2(self,atomselect):
             
             
