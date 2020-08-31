@@ -15,16 +15,17 @@ from sklearn import preprocessing
 from sklearn.linear_model import LinearRegression
 class Trajectory:
     
-    molID=0
+    
     def __init__(self,dcd,psf,first=0,last=-1,stride=1,waitfor=-1):
         self.psf = psf
         self.dcd = dcd
+        self.molID=0
         try:
         
-            Trajectory.molID=molecule.new('new')
-            Trajectory.molID=molecule.load('psf',self.psf) # load trajectory
-            molecule.read(Trajectory.molID,'dcd',self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
-            print (Trajectory.molID)
+            self.molID=molecule.new('new')
+            self.molID=molecule.load('psf',self.psf) # load trajectory
+            molecule.read(self.molID,'dcd',self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
+            print (self.molID)
         except IOError:
             print ("Could not read dcd file or psf:", dcd)
             raise Exception()
@@ -38,14 +39,14 @@ class Trajectory:
         promedio_x=[]
         promedio_y=[]
         promedio_z=[]
-        sel0 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=0) 
+        sel0 = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
         count=0   
         for frame in range(0, 1000,1):
             print (frame)
             for frame1 in range( Trajectory.num_frames(self)-5000, Trajectory.num_frames(self)-1):
-                sel0 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame1-1) 
+                sel0 = atomsel(selection=atomselect1, molid=self.molID, frame=frame1-1) 
                
-                sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame1+frame) 
+                sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame1+frame) 
                 sel1_x = np.array((sel1.center(sel1.mass)[0]))
                 sel0_x = np.array((sel0.center(sel0.mass)[0]))
                 
@@ -133,17 +134,17 @@ class Trajectory:
          
     
     def num_frames(self):
-        return molecule.numframes(Trajectory.molID)
+        return molecule.numframes(self.molID)
     
        
     def get_molid(self):
-        return Trajectory.molID
+        return self.molID
     
     def porcentaje_contact_radio_gyrations(self,atomselect1,atomselect2):
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
-            sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-            sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
             sel1_z = np.array((sel1.center(sel1.mass)[2]))
             sel2_z= np.array((sel2.center(sel2.mass)[2]))
             distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
@@ -154,33 +155,36 @@ class Trajectory:
         vector_radio=[]
         for frame in range(Trajectory.num_frames(self)):
             
-            protein  = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+            protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
             radio_giro=protein.rgyr(protein.mass)
             vector_radio.append(radio_giro)
-            #sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-            #sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+            #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            #sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
             #sel1_z = np.array((sel1.center(sel1.mass)[2]))
             #sel2_z= np.array((sel2.center(sel2.mass)[2]))
             #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
          
         return vector_radio  
     
-    def membrane_center_mass(self,atomselect1):
+    def membrane_center_mass(self,atomselect1,atomselect2):
         membrane_center_mass=[]
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
         
-            sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+            sel2 = atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+            #sel3 = atomsel(selection=atomselect2, molid=self.molID, frame=frame)  
             sel1_z = np.array((sel1.center(sel1.mass)[2]))
-            membrane_center_mass.append(np.linalg.norm(sel1_z))
+            sel2_z= np.array((sel2.center(sel2.mass)[2]))
+            membrane_center_mass.append(np.sqrt((sel2_z - sel1_z)**2))
         return membrane_center_mass     
     def distance_center_mass(self,atomselect1,atomselect2):
         distance_mass_weight=[]
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
         
-            sel1 =atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-            sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+            sel1 =atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
             sel1_z = np.array((sel1.center(sel1.mass)[2]))
             sel2_z= np.array((sel2.center(sel2.mass)[2]))
             
@@ -196,18 +200,18 @@ class Trajectory:
     
         return distance_mass_weight
     def porcentaje_contact(self,atomselect1,atomselect2):
-        protein = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=0) 
-        #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
              #num residuesatomselect1
         #num_residues=len(pd.factorize(protein.resid)[1])
         ocurrencias_vector=[]
         ocurrencias_temp=[]
               
         for frame in range(Trajectory.num_frames(self)):
-             protein  = atomsel(selection="protein", molid=Trajectory.molID, frame=frame) 
+             protein  = atomsel(selection="protein", molid=self.molID, frame=frame) 
              # use frame 0 for the reference
-             #sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-             sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              resid_center=protein.centerperresidue()
              if frame==0:
                  ocurrencias_vector= np.zeros(len(resid_center))
@@ -228,7 +232,7 @@ class Trajectory:
              #print (ocurrencias_temp)
              ocurrencias_temp= np.zeros(len(resid_center))    
              #(>) y “menor que” (<). C
-             #    sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #    sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              #sel1_z = np.array((sel1.center(sel1.mass)[2]))
              #sel2_z= np.array((sel2.center(sel2.mass)[2]))
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
@@ -249,18 +253,18 @@ class Trajectory:
         """
         
         
-        protein = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=0) 
-        #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
              #num residuesatomselect1
         #num_residues=len(pd.factorize(protein.resid)[1])
         ocurrencias_vector=[]
         ocurrencias_temp=[]
               
         for frame in range(first,last):
-             protein  = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+             protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
              # use frame 0 for the reference
-             #sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-             sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              resid_center=protein.centerperresidue()
              if frame==first:
                  ocurrencias_vector= np.zeros(len(resid_center))
@@ -271,12 +275,12 @@ class Trajectory:
              resid_z=list(map(lambda x: x, resid_center))
              nameP_z=list(map(lambda x: x[2], sel2.minmax()))
              #print(nameP_z)
-             membrane=atomsel(selection="resname POPC POPG", molid=Trajectory.molID, frame=frame)
+             membrane=atomsel(selection="resname POPC POPG", molid=self.molID, frame=frame)
              mem_mass_center_Z=membrane.center(membrane.mass)[2]
              #print (mem_mass_center_Z)
              
              #outerleaf
-             name_P_down=atomsel(selection="name P and z<"+str(mem_mass_center_Z) ,molid=Trajectory.molID, frame=frame)
+             name_P_down=atomsel(selection="name P and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              
              x_down=np.asarray(name_P_down.x) 
              y_down=np.asarray(name_P_down.z) 
@@ -287,7 +291,7 @@ class Trajectory:
              #y_down_ajuste = p_down[0]*x_down + p_down[1]
              
              #inner leaf
-             name_P_up=atomsel(selection="name P and z>"+str(mem_mass_center_Z) ,molid=Trajectory.molID, frame=frame)
+             name_P_up=atomsel(selection="name P and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              x_up = name_P_up.x
              y_up = name_P_up.z
             
@@ -328,7 +332,7 @@ class Trajectory:
              #print (ocurrencias_temp)
              ocurrencias_temp= np.zeros(len(resid_center))    
              #(>) y “menor que” (<). C
-             #    sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #    sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              #sel1_z = np.array((sel1.center(sel1.mass)[2]))
              #sel2_z= np.array((sel2.center(sel2.mass)[2]))
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
@@ -349,18 +353,18 @@ class Trajectory:
         """
         
         
-        protein = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=0) 
-        #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
              #num residuesatomselect1
         #num_residues=len(pd.factorize(protein.resid)[1])
         ocurrencias_vector=[]
         ocurrencias_temp=[]
               
         for frame in range(first,last):
-             protein  = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+             protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
              # use frame 0 for the reference
-             #sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-             sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              resid_center=protein.centerperresidue()
              if frame==first:
                  ocurrencias_vector= np.zeros(len(resid_center))
@@ -371,12 +375,12 @@ class Trajectory:
              resid_z=list(map(lambda x: x, resid_center))
              nameP_z=list(map(lambda x: x[2], sel2.minmax()))
              #print(nameP_z)
-             membrane=atomsel(selection="resname POPC POPG", molid=Trajectory.molID, frame=frame)
+             membrane=atomsel(selection="resname POPC POPG", molid=self.molID, frame=frame)
              mem_mass_center_Z=membrane.center(membrane.mass)[2]
              #print (mem_mass_center_Z)
              
              #outerleaf
-             name_P_down=atomsel(selection="name P and z<"+str(mem_mass_center_Z) ,molid=Trajectory.molID, frame=frame)
+             name_P_down=atomsel(selection="name P and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              
              x_down=np.asarray(name_P_down.x) 
              y_down=np.asarray(name_P_down.z) 
@@ -387,7 +391,7 @@ class Trajectory:
              #y_down_ajuste = p_down[0]*x_down + p_down[1]
              
              #inner leaf
-             name_P_up=atomsel(selection="name P and z>"+str(mem_mass_center_Z) ,molid=Trajectory.molID, frame=frame)
+             name_P_up=atomsel(selection="name P and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              x_up = name_P_up.x
              y_up = name_P_up.z
             
@@ -428,7 +432,7 @@ class Trajectory:
              #print (ocurrencias_temp)
              ocurrencias_temp= np.zeros(len(resid_center))    
              #(>) y “menor que” (<). C
-             #    sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #    sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              #sel1_z = np.array((sel1.center(sel1.mass)[2]))
              #sel2_z= np.array((sel2.center(sel2.mass)[2]))
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
@@ -436,18 +440,18 @@ class Trajectory:
         return ocurrencias_vector
     
     def time_contact(self,atomselect1,atomselect2):
-        protein = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=0) 
-        #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
              #num residuesatomselect1
         #num_residues=len(pd.factorize(protein.resid)[1])
         ocurrencias_vector=[]
         ocurrencias_temp=[]
               
         for frame in range(Trajectory.num_frames(self)):
-             protein  = atomsel(selection="protein", molid=Trajectory.molID, frame=frame) 
+             protein  = atomsel(selection="protein", molid=self.molID, frame=frame) 
              # use frame 0 for the reference
-             #sel1 = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
-             sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              resid_center=protein.centerperresidue()
              if frame==0:
                  ocurrencias_vector= np.zeros(len(resid_center))
@@ -471,7 +475,7 @@ class Trajectory:
              ocurrencias_vector=np.vstack((ocurrencias_vector, ocurrencias_temp))
              ocurrencias_temp= np.zeros(len(resid_center))    
              #(>) y “menor que” (<). C
-             #    sel2 =atomsel(selection=atomselect2, molid=Trajectory.molID, frame=frame)
+             #    sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
              #sel1_z = np.array((sel1.center(sel1.mass)[2]))
              #sel2_z= np.array((sel2.center(sel2.mass)[2]))
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
@@ -484,7 +488,7 @@ class Trajectory:
     def rmsd_time(self,atomselect):
          rmsd_array=[]
          # use frame 0 for the reference
-         reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0) 
+         reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
          #compare = atomsel(atomselect)
          #set reference [atomselect $mol "protein" frame 0]
          # the frame being compared 
@@ -493,7 +497,7 @@ class Trajectory:
              #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
               # the frame being compared 
              
-             compare = atomsel(selection=atomselect, molid=Trajectory.molID, frame=frame) 
+             compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
              #set trans_mat [measure fit $compare $reference]
              trans_mat=atomsel.fit(compare,reference)
              # do the alignment
@@ -507,8 +511,8 @@ class Trajectory:
     def rmsd_time_references(self,atomselect,references1):
          rmsd_array=[]
          # use frame 0 for the reference
-         reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0)
-         reference2 = atomsel(selection=references1, molid=Trajectory.molID, frame=0) 
+         reference = atomsel(selection=atomselect, molid=self.molID, frame=0)
+         reference2 = atomsel(selection=references1, molid=self.molID, frame=0) 
          #compare = atomsel(atomselect)
          #set reference [atomselect $mol "protein" frame 0]
          # the frame being compared 
@@ -516,9 +520,9 @@ class Trajectory:
          for frame in range(Trajectory.num_frames(self)):
              #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
               # the frame being compared 
-             compare = atomsel(selection=atomselect, molid=Trajectory.molID, frame=frame) 
+             compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
              
-             compare2 = atomsel(selection=references1, molid=Trajectory.molID, frame=frame) 
+             compare2 = atomsel(selection=references1, molid=self.molID, frame=frame) 
              #set trans_mat [measure fit $compare $reference]
              trans_mat=atomsel.fit(compare,reference)
              # do the alignment
@@ -534,10 +538,10 @@ class Trajectory:
     def rmsf_time(self,atomselect):
         rmsd_array=[]
         
-        reference1 = atomsel(selection=atomselect, molid=Trajectory.molID, frame=1) 
+        reference1 = atomsel(selection=atomselect, molid=self.molID, frame=1) 
         # use frame 0 for the reference
-        reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0) 
-        #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+        reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
         #num residues
         num_residues=len(pd.factorize(reference.resid)[1])
         rmsf = np.zeros(num_residues)
@@ -550,7 +554,7 @@ class Trajectory:
              #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
               # the frame being compared 
         
-             compare = atomsel(selection=atomselect, molid=Trajectory.molID, frame=frame) 
+             compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
              #set trans_mat [measure fit $compare $reference]
              trans_mat=atomsel.fit(compare,reference)
              # do the alignment
@@ -566,8 +570,8 @@ class Trajectory:
     def rmsd_vmd(self,atomselect):
          rmsd_array=[]
          # use frame 0 for the reference
-         reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0)
-         reference1 = atomsel(selection=atomselect, molid=Trajectory.molID, frame=1)  
+         reference = atomsel(selection=atomselect, molid=self.molID, frame=0)
+         reference1 = atomsel(selection=atomselect, molid=self.molID, frame=1)  
          x=reference.rmsd(selection=reference1)
          print (x) 
          #compare = atomsel(atomselect)
@@ -579,8 +583,8 @@ class Trajectory:
             #Leftraru2018
             
             # use frame 0 for the reference
-            reference = atomsel(selection=atomselect, molid=Trajectory.molID, frame=0) 
-            #reference1 = atomsel(selection="protein", molid=Trajectory.molID, frame=0) 
+            reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
+            #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
             #num residues
             num_residues=len(pd.factorize(reference.resid)[1])
             print (num_residues)
@@ -590,15 +594,15 @@ class Trajectory:
             #set reference [atomselect $mol "protein" frame 0]
             # the frame being compared 
             #set compare [atomselect $mol "protein"]
-            mask = vmdnumpy.atomselect(molid=Trajectory.molID, frame=0,selection=atomselect)
-            ref = np.compress(mask, vmdnumpy.timestep(Trajectory.molID, 0), axis=0)
+            mask = vmdnumpy.atomselect(molid=self.molID, frame=0,selection=atomselect)
+            ref = np.compress(mask, vmdnumpy.timestep(self.molID, 0), axis=0)
             
             for frame in range(Trajectory.num_frames(self)):
                  #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
                   # the frame being compared 
-                 frame = np.compress(mask, vmdnumpy.timestep(Trajectory.molID, frame), axis=0)
+                 frame = np.compress(mask, vmdnumpy.timestep(self.molID, frame), axis=0)
                  rmsf += np.sqrt(np.sum((frame-ref)**2, axis=1))
-                 #compare = atomsel(selection=atomselect, molid=Trajectory.molID, frame=frame) 
+                 #compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
                  #set trans_mat [measure fit $compare $reference]
                  #trans_mat=atomsel.fit(compare,reference)
                  # do the alignment
@@ -617,8 +621,8 @@ class Trajectory:
     def SASA(self,atomselect):
         sasa_vector=[]
         for frame in range(Trajectory.num_frames(self)):
-                 lig_sel  = atomsel(selection="resname LEU ILE VAL ALA PHE TRP MET", molid=Trajectory.molID, frame=frame) 
-                 big_sel  = atomsel(selection=atomselect, molid=Trajectory.molID, frame=frame) 
+                 lig_sel  = atomsel(selection="resname LEU ILE VAL ALA PHE TRP MET", molid=self.molID, frame=frame) 
+                 big_sel  = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
                  #>>> big_sel = atomsel('protein or resname LIG')
                  #>>> lig_sel = atomsel('resname LIG')
                  ligand_in_protein_sasa = big_sel.sasa(srad=1.4, restrict=lig_sel)
@@ -635,7 +639,7 @@ class Trajectory:
         print (radio_vect)
 
         for frame in range(first,last):
-                 protein  = atomsel(selection=sel1, molid=Trajectory.molID, frame=frame) 
+                 protein  = atomsel(selection=sel1, molid=self.molID, frame=frame) 
                  query_name_p=sel2+" and ( x>= "+str(protein.center()[0]-radio_vect)+" and x<= "+str(protein.center()[0]+radio_vect)+")"
                  radio_giro=protein.rgyr(protein.mass)
                  print (radio_giro)
@@ -644,7 +648,7 @@ class Trajectory:
                  print (protein.minmax())
                  zmax=protein.minmax()[0][2]
                  
-                 name_p  = atomsel(selection=query_name_p, molid=Trajectory.molID, frame=frame)
+                 name_p  = atomsel(selection=query_name_p, molid=self.molID, frame=frame)
                  
                  
                  print (name_p.minmax())
@@ -655,7 +659,7 @@ class Trajectory:
                  z=protein.center(protein.mass)[2]
                  cilinder_water= "water and  same residue as (((x-"+str(x)+")^2" +"+(y-"+str(y)+")^2 <="+str(radio_giro)+"^2)and z >="+str(zmin)+" and z <="+str(zmax)+")"
                  print (cilinder_water)
-                 agua  = atomsel(selection=cilinder_water, molid=Trajectory.molID, frame=frame) 
+                 agua  = atomsel(selection=cilinder_water, molid=self.molID, frame=frame) 
                  print (len(agua.index))
                  num_agua=len(agua.index)
                  h=np.abs(zmin-zmax)
