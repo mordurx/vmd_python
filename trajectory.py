@@ -5,7 +5,7 @@ Created on Fri Jun 14 15:33:39 2019
 
 @author: eniac
 """
-
+from numpy import savetxt
 import subprocess
 from vmd import molecule,atomsel,vmdnumpy,animate
 import numpy as np
@@ -165,8 +165,25 @@ class Trajectory:
             #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
          
         return vector_radio  
+<<<<<<< HEAD
     
     def membrane_center_mass(self,atomselect1,atomselect2):
+=======
+    def center_mass(self,atomselect1,file=None):
+        
+        center_mass=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+        
+            sel = atomsel(selection=atomselect1, molid=Trajectory.molID, frame=frame) 
+            com_mass = np.array(sel.center(sel.mass))/10
+            center_mass.append(com_mass)
+        if file is not None:
+            with open(file, 'wb') as file1:
+                np.savetxt(file1, center_mass, delimiter=' ',fmt='%.6f')     
+        return center_mass  
+    def membrane_center_mass(self,atomselect1):
+>>>>>>> b1f60750b172ead58ab80479d39c705714bba1cc
         membrane_center_mass=[]
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
