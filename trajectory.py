@@ -165,10 +165,6 @@ class Trajectory:
             #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
          
         return vector_radio  
-<<<<<<< HEAD
-    
-    def membrane_center_mass(self,atomselect1,atomselect2):
-=======
     def center_mass(self,atomselect1,file=None):
         
         center_mass=[]
@@ -182,8 +178,7 @@ class Trajectory:
             with open(file, 'wb') as file1:
                 np.savetxt(file1, center_mass, delimiter=' ',fmt='%.6f')     
         return center_mass  
-    def membrane_center_mass(self,atomselect1):
->>>>>>> b1f60750b172ead58ab80479d39c705714bba1cc
+    def membrane_center_mass(self,atomselect1,atomselect2):
         membrane_center_mass=[]
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
