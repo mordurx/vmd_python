@@ -546,7 +546,36 @@ class Trajectory:
              #set rmsd [measure rmsd $compare $reference]
              rmsd_array.append(atomsel.rmsd(compare2,reference2))
     
-         return rmsd_array 
+         return rmsd_array
+    @staticmethod     
+    def promedio_ocurrencias(*args):
+        ocurrence=np.transpose(args)
+        value = 0
+        mean_residues=[]
+        std_residues=[]
+        for x in ocurrence:
+            
+            std_residues.append(np.std(x))
+            mean_residues.append(np.mean(x))
+            #0.42:0.1805
+            print (np.sum(x[0]))
+        return [mean_residues,std_residues]
+    @staticmethod     
+    def set_beta_factor(residue_occupancy:list, query,molid:int,output:str):
+        """
+        metodo que colorea por beta factor
+        residue_occupancy: vector con valores a colocar en beta columm
+        query: atomselecion "protein"
+        output "pbd salida"
+        molid: id de la proteina  
+        """
+        protein = atomsel(query)
+        for x in protein.resid:
+            atomsel("protein and resid "+str(x)).beta=residue_occupancy[x-1]
+            print(x,residue_occupancy[x-1])
+        protein.write("pdb",output)
+        print("cerrando molecula ",molid) 
+        molecule.delete(molid)        
     def rmsf_time(self,atomselect):
         rmsd_array=[]
         

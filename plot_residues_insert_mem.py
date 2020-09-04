@@ -1,8 +1,10 @@
 
 #%%%
+import plotly.graph_objects as go
 from trajectory import Trajectory
 import matplotlib.pyplot as plt
 import numpy as np
+from vmd import molecule,atomsel
 from matplotlib  import rcParams
 def color_snx():
     dict_color_snx_482={}
@@ -121,19 +123,37 @@ a[1][1].set_xlabel('residues')
 a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
 
-
+result=Trajectory.promedio_ocurrencias(r1,r2,r3,r4)
 #plt.plot(time_line, r1, label='sim1')
 #plt.plot(time_line, r2, label='sim2')
 #plt.plot(time_line, r3, label='sim3')
 #plt.plot(time_line, r4, label='sim4')
 #plt.legend()
-plt.savefig("/mnt/e/3popc_popg/residue.png", dpi=900) 
+plt.savefig("/mnt/e/3popc_popg/residue.png", dpi=900)
+plt.figure()
+lower_error = np.divide(result[1], 5000000)
+upper_error = result[1]
+asymmetric_error = [lower_error, upper_error]
+#plt.errorbar(index, result[0], result[1], linestyle='None', marker='^')
+plt.bar(index, result[0],color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8,yerr=asymmetric_error,capsize=2)
+plt.xticks(index, index, fontsize=5, rotation=0)
+plt.title('POPC promedio 300-500 ns')
+plt.ylabel('relative ocurrences')
+plt.xlabel('residue #')
+plt.legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
+plt.savefig("/mnt/e/3popc_popg/12.png", dpi=900) 
 plt.show()
 
-
-
-
-
+#### colorear por beta factor
+pdb='/mnt/e/3popc_popg/snx482.pdb'
+output='/mnt/e/3popc_popg/snx3popc1popg.pdb'
+molid = molecule.load("pdb", pdb)
+print(molid)
+query = "segname TOX"
+#vector=np.linspace(0, 1, num=len(protein.beta),)
+Trajectory.set_beta_factor(result[0],query,molid,output)
+#color scale
+# small=red, middle=white, large=blue
 
 
 # %%
