@@ -4,15 +4,15 @@ from decimal import Decimal
 tmin = 10 # Minimum timestep used for MSD calculation
 tmax = 100 # Maximum timestep used for MSD calculation
 m = 20 # Number of MSD values in fitting
-nseg = 100 # Number of segments
-dt = 0.5 # dt*tunit is the timestep of the input trajectory
-path="/media/eniac/mdd1/paper_membranas/analisis/coef_diff_agua/"
+nseg = 1000 # Number of segments
+dt = 5 # dt*tunit is the timestep of the input trajectory
+#path="/media/eniac/mdd1/paper_membranas/analisis/coef_diff_agua/"
 #path="/media/eniac/mdd1/paper_membranas/snx_water_coef_difu/dcd/"
-filename='agua_agua75nsindex 5799 5800 5801.dat'
-fz=path+filename
+filename='memtox2dprotein.dat'
+fz=filename
 
-fout=path+'coef_diff_paper'
-res_3D = Dfit.Dcov(fz=fz,tmin=tmin,tmax=tmax,m=m,nseg=nseg,dt=dt)
+fout='mem_tox_coef'
+res_3D = Dfit.Dcov(fz=fz,tmin=tmin,tmax=tmax,m=m,nseg=nseg,dt=dt,imgfmt='png')
 res_3D.run_Dfit()
 
 
@@ -27,10 +27,10 @@ L = 7.7 # Box edge length in nm (cubic box!)
 T = 300 # Temperature in Kelvin
 
 res_3D.analysis(tc=tc)
-res_3D.finite_size_correction(T=T,eta=eta,L=L,tc=tc)
+#res_3D.finite_size_correction(T=T,eta=eta,L=L,tc=tc)
 
 #0.004592890975343372 nm^2/ps
-def nm_ps_to_cm2_s(value= 0.004855):
+def nm_ps_to_cm2_s(value= 1.9689570536523056e-05):
     value=float( '%.2E' % Decimal(value))
     print (value)
     ps_to_seg=1e-12
