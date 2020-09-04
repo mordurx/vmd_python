@@ -14,26 +14,28 @@ import matplotlib as mpl
 '''
 paths files
 '''
-query='index 5799 5800 5801'
-path="/media/eniac/mdd1/paper_membranas/analisis/coef_diff_agua/"
+query='protein'
+#path="/media/eniac/mdd1/paper_membranas/analisis/coef_diff_agua/"
+path='/home/eniac/Documents/sim2_coef_diff/MD/'
+path2='/home/eniac/Documents/sim2_coef_diff/'
 
-dcds=['mytraj.dcd','mytra22j.dcd','tox_unwrap1micro.dcd','unwrapfix_tox_micro.dcd','unwrapped75ns_agua.dcd']
-dcd1=path+str(dcds[4])
-psfs=['snx_water_ions.psf','snx.rep.cen.psf','solvate.psf']
-psf1=path+str(psfs[2])
+dcds=['eq0.dcd','unwrap2micro_mentox.dcd','mytraj.dcd','mytra22j.dcd','tox_unwrap1micro.dcd','unwrapfix_tox_micro.dcd','unwrapped75ns_agua.dcd']
+dcd1=path+str(dcds[1])
+psfs=['snx_water_ions.psf','snx.rep.cen.psf','solvate.psf','sim2_1_1_popc_popg_difu.Wat.ion.psf']
+psf1=path2+str(psfs[1])
 
-filename='agua_agua75ns'+query+'.dat'
+filename='memtox2d'+query+'.dat'
 filepathname=path+str(filename)
 
 #llamo a mi clase tratectoria rep0
-Trajectory1=Trajectory(dcd1,psf1,first=100000,last=150000,stride=1,waitfor=-1)
+Trajectory1=Trajectory(dcd1,psf1,first=0,last=-1,stride=1,waitfor=-1)
 print(Trajectory1.num_frames())
-com_Traj_bigdcd=Trajectory1.center_mass(query,filepathname)
+com_Traj_bigdcd=Trajectory1.center_mass(query,dim=2,file=filepathname)
 time_line=np.linspace(0, Trajectory1.num_frames(), num=Trajectory1.num_frames())
 com_Traj_bigdcd=np.transpose(com_Traj_bigdcd)
 plt.plot(time_line, com_Traj_bigdcd[0], label='x')
 plt.plot(time_line, com_Traj_bigdcd[1], label='y')
-plt.plot(time_line, com_Traj_bigdcd[2], label='z')
+#plt.plot(time_line, com_Traj_bigdcd[2], label='z')
 plt.legend()
 plt.show()
 #com_Traj_bigdcd=np.transpose(com_Traj_bigdcd)
