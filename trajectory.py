@@ -140,6 +140,31 @@ class Trajectory:
     def get_molid(self):
         return self.molID
     
+    
+    
+    
+    @staticmethod
+    def delete_frame_wrap(vector_distancia,cutoff):
+        "aun no completoooo no usarr 5 sep 2020"
+        valor_anterior=vector_distancia[0]
+        cont=0
+        vector_new_distance=[]
+        for i in vector_distancia:
+            if np.abs(valor_anterior-j)>=cutoff:
+                    del vector_distancia[cont]
+                    print ('deleting.. frame',cont)
+                    
+                
+            else:
+                vector_new_distance.append(i)
+                valor_anterior=j
+            cont=cont+1
+            
+                
+            
+        return vector_new_distance
+
+
     def porcentaje_contact_radio_gyrations(self,atomselect1,atomselect2):
         for frame in range(Trajectory.num_frames(self)):
             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
