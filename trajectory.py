@@ -375,6 +375,86 @@ class Trajectory:
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
     
         return ocurrencias_vector/(last-first)
+        
+    
+    def get_residue_insert_mem_per_frame(self,frame,membrane,fosfolipid_head_select,protein_select):
+        inserted_residues=[]
+        protein  = atomsel(selection=protein_select, molid=self.molID, frame=frame) 
+        resid_center=protein.centerperresidue()
+        resid_z=list(map(lambda x: x, resid_center))     
+        membrane  = atomsel(selection=membrane, molid=self.molID, frame=frame)
+        #outerleaf
+        name_P_down=atomsel(selection=fosfolipid_head_select+" and z<"+str(membrane.center(membrane.mass)[2]) ,molid=self.molID, frame=frame) 
+        #inner leaf
+        name_P_up=atomsel(selection=fosfolipid_head_select+" and z>"+str(membrane.center(membrane.mass)[2]) ,molid=self.molID, frame=frame)
+             
+        x_down=np.asarray(name_P_down.x).transpose() 
+        y_down=np.asarray(name_P_down.z).transpose()
+        p_down = np.polyfit(x_down, y_down, 1)
+             
+        x_up=np.asarray(name_P_up.x).transpose()  
+        y_up=np.asarray(name_P_up.z).transpose()  
+        p_up = np.polyfit(x_up, y_up, 1)
+        
+        for number_resid in range(len(resid_z)):
+            x_residue=resid_z[number_resid][0]
+            z_down_ajuste = p_down[0]*x_residue + p_down[1]
+            z_up_ajuste = p_up[0]*x_residue + p_up[1]
+            if resid_z[number_resid][2]<z_up_ajuste and resid_z[number_resid][2]>z_down_ajuste:
+                    inserted_residues.append(number_resid)
+                 
+        return inserted_residues
+    def porcentaje_contact_free_energy(self,atomselect1,first,last,residue_to_find):
+        #calcular la energia libre a partir de eventos de pegado no pegado.
+        #criterio:puede tener varios criterios para decir que es pegado o no
+        #1) si el parche esta hacia abajo o mas bien cerca de la membrana es 1
+        #es decir si resid 10 or 11 esta cerca de men and 29 or  30 esta cerca de nem 
+        
+        #get selecion at frame 0
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        
+        #divido el residuos del parche en 2 grupos
+        parche1=residue_to_find[0]
+        parche2=residue_to_find[1]
+
+        unbound=0
+        bound=0      
+        for frame in range(first,last):
+             protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+             inserted_residues=Trajectory.get_residue_insert_mem_per_frame(self,frame,"resname POPC POPG","name P","protein")
+             #print (inserted_residues)
+        
+             
+
+             if not protein.resid:
+                 #print ("vacio frame "+str(frame))
+                 unbound=unbound+1
+             else: 
+                
+                residues_in_contact_membrane=sorted(protein.resid+inserted_residues)
+                residues_in_contact_membrane=np.unique(residues_in_contact_membrane).tolist()
+                
+                print  (residues_in_contact_membrane)
+                parche1_ON=0
+                parche2_ON=0
+                for ind in residues_in_contact_membrane:
+                    if (ind in parche1):
+                        parche1_ON=1
+                        continue
+                    elif (ind in parche2):
+                        parche2_ON=1
+                        continue
+                if (parche1_ON==1 and parche2_ON==1):
+                    bound=bound+1
+                    #print (residues_in_contact_membrane)
+                    print (frame)
+                        
+                else:
+                    unbound=unbound+1
+                residues_in_contact_membrane=[]                
+        return [unbound,bound]
+
+
     def porcentaje_contact_fit_list(self,atomselect1,atomselect2,first,last):
         """
         este metodo la colision  del residuo a la cabezas de Posfato de la membrana.

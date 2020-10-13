@@ -1,6 +1,6 @@
 
 #%%%
-import plotly.graph_objects as go
+
 from trajectory import Trajectory
 import matplotlib.pyplot as plt
 import numpy as np
@@ -52,17 +52,40 @@ def color_snx():
     return list(dict_color_snx_482.values())
 
     
-sim1_dcd= "/mnt/e/3popc_popg/rep0.mem.tox.dcd"
-sim1_psf="/mnt/e/3popc_popg/rep0.mem.tox.psf"
+# sim1_dcd= "/media/eniac/mdd1/paper_membranas/sim1_3popg_1popc/sim1_3popg_popc_fixed_unwrapped.dcd"
+# sim1_psf="/media/eniac/mdd1/paper_membranas/sim1_3popg_1popc/agua_tox_mem_Sim1_ions.Wat.psf"
 
-sim2_dcd= "/mnt/e/3popc_popg/rep1_tox_mem500.dcd"
-sim2_psf="/mnt/e/3popc_popg/rep1.mem.tox.psf"
+# sim2_dcd= "/media/eniac/mdd1/paper_membranas/sim2_3popg_popc/sim2_3popg_unwrap.dcd"
+# sim2_psf="/media/eniac/mdd1/paper_membranas/sim2_3popg_popc/3popg_popc_tox.psf"
 
-sim3_dcd= "/mnt/e/3popc_popg/rep2_tox_mem500.dcd"
-sim3_psf="/mnt/e/3popc_popg/rep2.mem.tox.psf"
+# sim3_dcd= "/media/eniac/mdd1/paper_membranas/sim3_3popg_popc/MD/sim3_3popg_popc.dcd"
+# sim3_psf="/media/eniac/mdd1/paper_membranas/sim3_3popg_popc/agua_tox_mem_Sim1_ions.Wat.psf"
 
-sim4_dcd= "/mnt/e/3popc_popg/rep3_tox_mem500.dcd"
-sim4_psf="/mnt/e/3popc_popg/rep3.mem.tox.psf"
+
+# sim4_dcd= "/media/eniac/mdd1/paper_membranas/sim4_3popg_popc/sim4_3popg_popc.dcd"
+# sim4_psf="/media/eniac/mdd1/paper_membranas/sim4_3popg_popc/agua_tox_mem_Sim1_ions.Wat.psf"
+# sim1_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_popc_popg_XI.dcd'
+# sim1_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/sim1_ix_1_popc_popg.Wat.psf'
+
+# sim2_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_3popg_popg_XI.dcd'
+# sim2_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/ix_fix_ions.Wat.psf'
+
+# sim3_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/simXI_3popc_popg.dcd"
+# sim3_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_final1.Wat.psf"
+
+# sim4_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_popg_XI.dcd'
+# sim4_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/sim1_IX_popg_ions.Wat.psf'
+sim1_dcd='/media/eniac/mdd1/paper_membranas/POPG/unwrap_sim1_popg.dcd'
+sim1_psf='/media/eniac/mdd1/paper_membranas/POPG/sim1_popg.psf'
+
+sim2_dcd='/media/eniac/mdd1/paper_membranas/POPG/unwrap_sim2_popg.dcd'
+sim2_psf='/media/eniac/mdd1/paper_membranas/POPG/sim2_popg_ions.Wat.psf'
+
+sim3_dcd= "/media/eniac/mdd1/paper_membranas/POPG/unwrap_sim3_popg.dcd"
+sim3_psf="/media/eniac/mdd1/paper_membranas/POPG/sim3_POPG_ions.Wat.psf"
+
+sim4_dcd='/media/eniac/mdd1/paper_membranas/POPG/sim4_POPG_filt_memtox.dcd'
+sim4_psf='/media/eniac/mdd1/paper_membranas/POPG/sim4_POPG_POPC.ions.Wat.psf'
 
 traj1=Trajectory(sim1_dcd,sim1_psf,stride=1)
 traj2=Trajectory(sim2_dcd,sim2_psf,stride=1)
@@ -92,7 +115,7 @@ lines=a[0][0].bar(index, r1,color=colors,edgecolor='gray',width = (index[1]-inde
 a[0][0].set_title('sim 1 300-500 ns')
 a[0][0].set_xticks(index)
 a[0][0].set_xticklabels(index,fontsize=4,rotation=90)
-a[0][0].set_ylabel('occurrences')
+#a[0][0].set_ylabel('occurrences')
 #a[0][0].set_xlabel('residues')
 a[0][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
@@ -110,7 +133,7 @@ lines=a[1][0].bar(index, r3,color=colors,edgecolor='gray',width = (index[1]-inde
 a[1][0].set_title('sim 3 300-500 ns')
 a[1][0].set_xticks(index)
 a[1][0].set_xticklabels(index,fontsize=4,rotation=90)
-#a[0][1].set_ylabel('occurrences')
+#a[1][0].set_ylabel('occurrences')
 a[1][0].set_xlabel('residues')
 a[1][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
@@ -118,7 +141,7 @@ lines=a[1][1].bar(index, r4,color=colors,edgecolor='gray',width = (index[1]-inde
 a[1][1].set_title('sim 4 300-500 ns')
 a[1][1].set_xticks(index)
 a[1][1].set_xticklabels(index,fontsize=4,rotation=90)
-a[1][1].set_ylabel('occurrences')
+#a[1][1].set_ylabel('occurrences')
 a[1][1].set_xlabel('residues')
 a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
@@ -129,7 +152,7 @@ result=Trajectory.promedio_ocurrencias(r1,r2,r3,r4)
 #plt.plot(time_line, r3, label='sim3')
 #plt.plot(time_line, r4, label='sim4')
 #plt.legend()
-plt.savefig("/mnt/e/3popc_popg/residue.png", dpi=900)
+plt.savefig("/media/eniac/mdd1/paper_membranas/POPG/popg_residues_insert_IX.png", dpi=900)
 plt.figure()
 lower_error = np.divide(result[1], 5000000)
 upper_error = result[1]
@@ -137,21 +160,21 @@ asymmetric_error = [lower_error, upper_error]
 #plt.errorbar(index, result[0], result[1], linestyle='None', marker='^')
 plt.bar(index, result[0],color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8,yerr=asymmetric_error,capsize=2)
 plt.xticks(index, index, fontsize=5, rotation=0)
-plt.title('POPC promedio 300-500 ns')
+plt.title('=POPG promedio 400-500 ns')
 plt.ylabel('relative ocurrences')
 plt.xlabel('residue #')
 plt.legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
-plt.savefig("/mnt/e/3popc_popg/12.png", dpi=900) 
+plt.savefig("/media/eniac/mdd1/paper_membranas/POPG/popg_residues_all_contact.png", dpi=900) 
 plt.show()
 
 #### colorear por beta factor
-pdb='/mnt/e/3popc_popg/snx482.pdb'
+""" pdb='/mnt/e/3popc_popg/snx482.pdb'
 output='/mnt/e/3popc_popg/snx3popc1popg.pdb'
 molid = molecule.load("pdb", pdb)
 print(molid)
 query = "segname TOX"
 #vector=np.linspace(0, 1, num=len(protein.beta),)
-Trajectory.set_beta_factor(result[0],query,molid,output)
+Trajectory.set_beta_factor(result[0],query,molid,output) """
 #color scale
 # small=red, middle=white, large=blue
 
