@@ -3,78 +3,33 @@ import matplotlib.pyplot as plt
 import numpy as np
 from vmd import molecule,atomsel
 from matplotlib  import rcParams
-def color_snx():
-    dict_color_snx_482={}
-    dict_color_snx_482['1']='green'
-    dict_color_snx_482['2']='white'
-    dict_color_snx_482['3']='red'
-    dict_color_snx_482['4']='blue'
-    dict_color_snx_482['5']='white'
-    dict_color_snx_482['6']='green'
-    dict_color_snx_482['7']='white'
-    dict_color_snx_482['8']='blue'
-    dict_color_snx_482['9']='green'
-    dict_color_snx_482['10']='white'
-    dict_color_snx_482['11']='white'
-    dict_color_snx_482['12']='green'
-    dict_color_snx_482['13']='green'
-    dict_color_snx_482['14']='white'
-    dict_color_snx_482['15']='green'
-    dict_color_snx_482['16']='white'
-    dict_color_snx_482['17']='green'
-    dict_color_snx_482['18']='red'
-    dict_color_snx_482['19']='red'
-    dict_color_snx_482['20']='white'
-    dict_color_snx_482['21']='white'
-    dict_color_snx_482['22']='white'
-    dict_color_snx_482['23']='blue'
-    dict_color_snx_482['24']='white'
-    dict_color_snx_482['25']='green'
-    dict_color_snx_482['26']='white'
-    dict_color_snx_482['27']='green'
-    dict_color_snx_482['28']='green'
-    dict_color_snx_482['29']='white'
-    dict_color_snx_482['30']='white'
-    dict_color_snx_482['31']='green'
-    dict_color_snx_482['32']='green'
-    dict_color_snx_482['33']='white'
-    dict_color_snx_482['34']='white'
-    dict_color_snx_482['35']='white'
-    dict_color_snx_482['36']='red'
-    dict_color_snx_482['37']='white'
-    dict_color_snx_482['38']='green'
-    dict_color_snx_482['39']='white'
-    dict_color_snx_482['40']='green'
-    dict_color_snx_482['41']='red'
-    return list(dict_color_snx_482.values())
-
     
-# sim1_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_popc_popg_XI.dcd'
-# sim1_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/sim1_ix_1_popc_popg.Wat.psf'
+# sim1_dcd='/mnt/e/paper_membranas/xi_jinghao_toxin/unwrapped_popc_popg_XI.dcd'
+# sim1_psf='/mnt/e/paper_membranas/xi_jinghao_toxin/sim1_ix_1_popc_popg.Wat.psf'
 
-# sim2_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_3popg_popg_XI.dcd'
-# sim2_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/ix_fix_ions.Wat.psf'
+# sim2_dcd='/mnt/e/paper_membranas/xi_jinghao_toxin/unwrapped_3popg_popg_XI.dcd'
+# sim2_psf='/mnt/e/paper_membranas/xi_jinghao_toxin/ix_fix_ions.Wat.psf'
 
-# sim3_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/simXI_3popc_popg.dcd"
-# sim3_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_final1.Wat.psf"
+# sim3_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/simXI_3popc_popg.dcd"
+# sim3_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_final1.Wat.psf"
 
-# sim4_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/unwrapped_popg_XI.dcd'
-# sim4_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/sim1_IX_popg_ions.Wat.psf'
+# sim4_dcd='/mnt/e/paper_membranas/xi_jinghao_toxin/unwrapped_popg_XI.dcd'
+# sim4_psf='/mnt/e/paper_membranas/xi_jinghao_toxin/sim1_IX_popg_ions.Wat.psf'
 
 
 
 """ POPG"""
-sim1_dcd='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/unwrap_sim1_popg.dcd'
-sim1_psf='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/sim1_popg.psf'
+sim1_dcd='/mnt/e/paper_membranas/POPG/POPG_resume/unwrap_sim1_popg.dcd'
+sim1_psf='/mnt/e/paper_membranas/POPG/POPG_resume/sim1_popg.psf'
 
-sim2_dcd='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/unwrap_sim2_popg.dcd'
-sim2_psf='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/sim2_popg_ions.Wat.psf'
+sim2_dcd='/mnt/e/paper_membranas/POPG/POPG_resume/unwrap_sim2_popg.dcd'
+sim2_psf='/mnt/e/paper_membranas/POPG/POPG_resume/sim2_popg_ions.Wat.psf'
 
-sim3_dcd= "/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/unwrap_sim3_popg.dcd"
-sim3_psf="/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/sim3_POPG_ions.Wat.psf"
+sim3_dcd= "/mnt/e/paper_membranas/POPG/POPG_resume/unwrap_sim3_popg.dcd"
+sim3_psf="/mnt/e/paper_membranas/POPG/POPG_resume/sim3_POPG_ions.Wat.psf"
 
-sim4_dcd='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/sim4_POPG_filt_memtox.dcd'
-sim4_psf='/media/eniac/mdd1/paper_membranas/POPG/POPG_resume/sim4_POPG_POPC.ions.Wat.psf'
+sim4_dcd='/mnt/e/paper_membranas/POPG/POPG_resume/sim4_POPG_filt_memtox.dcd'
+sim4_psf='/mnt/e/paper_membranas/POPG/POPG_resume/sim4_POPG_POPC.ions.Wat.psf'
 
 traj1=Trajectory(sim1_dcd,sim1_psf,stride=1)
 traj2=Trajectory(sim2_dcd,sim2_psf,stride=1)
@@ -94,17 +49,17 @@ traj4.close()
 
 
 """ 3POPG"""
-sim1_3popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim1_3popg_popc_unwrap.dcd"
-sim1_3popg_psf="/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim1_3popg_popc_unwrap.psf"
+sim1_3popg_dcd= "/mnt/e/paper_membranas/3POPG_popc_resume/sim1_3popg_popc_unwrap.dcd"
+sim1_3popg_psf="/mnt/e/paper_membranas/3POPG_popc_resume/sim1_3popg_popc_unwrap.psf"
 
-sim2_3popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim2_3popg_popc_unwrap.dcd"
-sim2_3popg_psf="/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim2_3popg_popc_unwrap.psf"
+sim2_3popg_dcd= "/mnt/e/paper_membranas/3POPG_popc_resume/sim2_3popg_popc_unwrap.dcd"
+sim2_3popg_psf="/mnt/e/paper_membranas/3POPG_popc_resume/sim2_3popg_popc_unwrap.psf"
 
-sim3_3popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim3_3popg_popc.dcd"
-sim3_3popg_psf="/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim3_3popg_popc.psf"
+sim3_3popg_dcd= "/mnt/e/paper_membranas/3POPG_popc_resume/sim3_3popg_popc.dcd"
+sim3_3popg_psf="/mnt/e/paper_membranas/3POPG_popc_resume/sim3_3popg_popc.psf"
 
-sim4_popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim4_3popg_popc.dcd"
-sim4_popg_psf="/media/eniac/mdd1/paper_membranas/3POPG_popc_resume/sim4_3popg_popc.psf"
+sim4_popg_dcd= "/mnt/e/paper_membranas/3POPG_popc_resume/sim4_3popg_popc.dcd"
+sim4_popg_psf="/mnt/e/paper_membranas/3POPG_popc_resume/sim4_3popg_popc.psf"
 
 
 
@@ -126,11 +81,11 @@ traj3_3popg.close()
 traj4_3popg.close()
 
 """POPC"""
-sim1_popc_dcd= "/media/eniac/mdd1/paper_membranas/POPC/sim_POPG_resume/sim1_unwrap_700nspopc.dcd"
-sim1_popc_psf="/media/eniac/mdd1/paper_membranas/POPC/sim_POPG_resume/sim1_unwrap_700nspopc.psf"
+sim1_popc_dcd= "/mnt/e/paper_membranas/POPC/sim_POPC_resume/sim1_unwrap_700nspopc.dcd"
+sim1_popc_psf="/mnt/e/paper_membranas/POPC/sim_POPC_resume/sim1_unwrap_700nspopc.psf"
 
-sim2_popc_dcd= "/media/eniac/mdd1/paper_membranas/POPC/sim_POPG_resume/sim2_unwrap_700nspopc.dcd"
-sim2_popc_psf="/media/eniac/mdd1/paper_membranas/POPC/sim_POPG_resume/sim2_unwrap_700nspopc.psf"
+sim2_popc_dcd= "/mnt/e/paper_membranas/POPC/sim_POPC_resume/sim2_unwrap_700nspopc.dcd"
+sim2_popc_psf="/mnt/e/paper_membranas/POPC/sim_POPC_resume/sim2_unwrap_700nspopc.psf"
 
 traj1_popc=Trajectory(sim1_popc_dcd,sim1_popc_psf,stride=1)
 traj2_popc=Trajectory(sim2_popc_dcd,sim2_popc_psf,stride=1)
@@ -141,17 +96,17 @@ traj1_popc.close()
 traj2_popc.close()
 
 """1POPC:1POPG"""
-sim1_popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim1_popc_popg_unwrap.dcd"
-sim1_popc_popg_psf="/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim1_popc_popg_unwrap.psf"
+sim1_popc_popg_dcd= "/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim1_popc_popg_unwrap.dcd"
+sim1_popc_popg_psf="/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim1_popc_popg_unwrap.psf"
 
-sim2_popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim2_popc_popg_unwrap.dcd"
-sim2_popc_popg_psf="/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim2_popc_popg_unwrap.psf"
+sim2_popc_popg_dcd= "/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim2_popc_popg_unwrap.dcd"
+sim2_popc_popg_psf="/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim2_popc_popg_unwrap.psf"
 
-sim3_popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim3_unwrap_popc_popg.dcd"
-sim3_popc_popg_psf="/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim3_unwrap_popc_popg.psf"
+sim3_popc_popg_dcd= "/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim3_unwrap_popc_popg.dcd"
+sim3_popc_popg_psf="/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim3_unwrap_popc_popg.psf"
 
-sim4_popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim4_unwrap_popc_popg.dcd"
-sim4_popc_popg_psf="/media/eniac/mdd1/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim4_unwrap_popc_popg.psf"
+sim4_popc_popg_dcd= "/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim4_unwrap_popc_popg.dcd"
+sim4_popc_popg_psf="/mnt/e/paper_membranas/1POPC_1POPG/sim_POPC_POPG_resume/sim4_unwrap_popc_popg.psf"
 
 traj1_popc_popg=Trajectory(sim1_popc_popg_dcd,sim1_popc_popg_psf,stride=1)
 traj2_popc_popg=Trajectory(sim2_popc_popg_dcd,sim2_popc_popg_psf,stride=1)
@@ -169,17 +124,17 @@ traj3_popc_popg.close()
 traj4_popc_popg.close()
 
 """3POPC:1POPG"""
-sim1_3popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim1_3popc_popg_unwrap.dcd"
-sim1_3popc_popg_psf="/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim1_3popc_popg_unwrap.psf"
+sim1_3popc_popg_dcd= "/mnt/e/paper_membranas/3POPC_popg_resume/sim1_3popc_popg_unwrap.dcd"
+sim1_3popc_popg_psf="/mnt/e/paper_membranas/3POPC_popg_resume/sim1_3popc_popg_unwrap.psf"
 
-sim2_3popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim2_3popc_popg_unwrap.dcd"
-sim2_3popc_popg_psf="/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim2_3popc_popg_unwrap.psf"
+sim2_3popc_popg_dcd= "/mnt/e/paper_membranas/3POPC_popg_resume/sim2_3popc_popg_unwrap.dcd"
+sim2_3popc_popg_psf="/mnt/e/paper_membranas/3POPC_popg_resume/sim2_3popc_popg_unwrap.psf"
 
-sim3_3popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim3_3popc_popg_unwrap.dcd"
-sim3_3popc_popg_psf="/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim3_3popc_popg_unwrap.psf"
+sim3_3popc_popg_dcd= "/mnt/e/paper_membranas/3POPC_popg_resume/sim3_3popc_popg_unwrap.dcd"
+sim3_3popc_popg_psf="/mnt/e/paper_membranas/3POPC_popg_resume/sim3_3popc_popg_unwrap.psf"
 
-sim4_3popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim4_3popc_popg_filt_unwrap.dcd.dcd"
-sim4_3popc_popg_psf="/media/eniac/mdd1/paper_membranas/3POPC_popg_resume/sim4_3popc_popg_filt_unwrap.dcd.psf"
+sim4_3popc_popg_dcd= "/mnt/e/paper_membranas/3POPC_popg_resume/sim4_3popc_popg_filt_unwrap.dcd.dcd"
+sim4_3popc_popg_psf="/mnt/e/paper_membranas/3POPC_popg_resume/sim4_3popc_popg_filt_unwrap.dcd.psf"
 
 traj1_3popc_popg=Trajectory(sim1_3popc_popg_dcd,sim1_3popc_popg_psf,stride=1)
 traj2_3popc_popg=Trajectory(sim2_3popc_popg_dcd,sim2_3popc_popg_psf,stride=1)
@@ -197,20 +152,20 @@ traj3_3popc_popg.close()
 traj4_3popc_popg.close()
 
 """IX toxin"""
-sim1_IX_popg_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim1_POPG.dcd"
-sim1_XI_popg_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim1_POPG.psf"
+sim1_IX_popg_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim1_POPG.dcd"
+sim1_XI_popg_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim1_POPG.psf"
 
-sim2_3popg_popc_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_3popg_popg_XI.dcd"
-sim2_3popg_popc_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_3popg_popg_XI.psf"
+sim2_3popg_popc_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_3popg_popg_XI.dcd"
+sim2_3popg_popc_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_3popg_popg_XI.psf"
 
-sim3_XI_popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.dcd"
-sim3_XI_popc_popg_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.psf"
+sim3_XI_popc_popg_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.dcd"
+sim3_XI_popc_popg_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.psf"
 
-sim4_3popc_popg_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.dcd"
-sim4_3popc_popg_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.psf"
+sim4_3popc_popg_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.dcd"
+sim4_3popc_popg_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.psf"
 
-sim5_popc_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim3_POPC.dcd"
-sim5_popc_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim3_POPC.psf"
+sim5_popc_dcd= "/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim3_POPC.dcd"
+sim5_popc_psf="/mnt/e/paper_membranas/xi_jinghao_toxin/IX_TOXIN_resume/unwrap_XI_sim3_POPC.psf"
 
 traj1_XI_popg=Trajectory(sim1_IX_popg_dcd,sim1_XI_popg_psf,stride=1)
 traj2_XI_3popg_popc=Trajectory(sim2_3popg_popc_dcd,sim2_3popg_popc_psf,stride=1)
