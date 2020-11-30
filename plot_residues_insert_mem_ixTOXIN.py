@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from vmd import molecule,atomsel
 from matplotlib  import rcParams
+plt.rc('font', family='serif') 
 def color_IX_toxin():
     dict_color_IX_toxin_482={}
     dict_color_IX_toxin_482['1']='red'
@@ -60,21 +61,21 @@ sim4_psf="/media/eniac/mdd1/paper_membranas/sim4_3popg_popc/agua_tox_mem_Sim1_io
 
 
 
-sim1_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPG/unwrap_XI_sim1_POPG.dcd'
-sim1_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPG/unwrap_XI_sim1_POPG.psf'
+sim1_dcd='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_sim1_POPG.dcd'
+sim1_psf='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_sim1_POPG.psf'
 
-sim2_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPC_POPG/unwrap_POPC_POPG_sim1.dcd'
-sim2_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPC_POPG/unwrap_POPC_POPG_sim1.psf'
+sim2_dcd='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.dcd'
+sim2_psf='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_POPC_POPG_sim1.psf'
 
-sim3_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_3POPG_POPC/unwrapped_3popg_popg_XI.dcd'
-sim3_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_3POPG_POPC/unwrapped_3popg_popg_XI.psf'
+sim3_dcd='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_3popg_popg_XI.dcd'
+sim3_psf='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_3popg_popg_XI.psf'
 
-sim4_dcd= "/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_3POPC_POPG/unwrap_XI_3POPC_POPG.dcd"
-sim4_psf="/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_3POPC_POPG/unwrap_XI_3POPC_POPG.psf"
+sim4_dcd= "/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.dcd"
+sim4_psf="/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_3POPC_POPG.psf"
 
 
-sim5_dcd='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPC/unwrap_XI_sim3_POPC.dcd'
-sim5_psf='/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/XI_POPC/unwrap_XI_sim3_POPC.psf'
+sim5_dcd='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_sim3_POPC.dcd'
+sim5_psf='/home/guido/resume_paper_membranas/IX_TOXIN_resume/unwrap_XI_sim3_POPC.psf'
 
 
 
@@ -117,37 +118,40 @@ traj5.close()
 
 
 colors=color_IX_toxin()
+#%%%
 index = np.arange(1,35)
-#plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.family'] = 'sans-serif'
 #plt.rcParams['font.sans-serif'] = 'Comic Sans MS'
-
+# = plt.figure(figsize=(10,3))
 fig,a =  plt.subplots(2,3)
-#fig.tight_layout()
+fig.tight_layout(h_pad=2)
+fig.set_figheight(7)
+fig.set_figwidth(10)
 lines=a[0][0].bar(index, r1,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
-a[0][0].set_title('sim POPG IX 300-500 ns')
+#a[0][0].set_title('POPG Jingzhaotoxin-XI 300-500 ns')
 a[0][0].set_xticks(index)
 a[0][0].set_xticklabels(index,fontsize=8,rotation=90)
 a[0][0].set_ylabel('occurrences')
 a[0][0].set_ylim(0, 1)
 #a[0][0].set_xlabel('residues')
-a[0][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[0][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 #a.tick_params(axis="x",rotation=0,labelsize=20)
 #lines=plt.bar(index, r1,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
 lines=a[0][1].bar(index, r2,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
-a[0][1].set_title('sim 2 POPG_POPC IX 300-500 ns')
+#a[0][1].set_title('POPG:POPC Jingzhaotoxin-XI 300-500 ns')
 a[0][1].set_xticks(index)
 a[0][1].set_ylim(0, 1) 
 a[0][1].set_xticklabels(index,fontsize=8,rotation=90)
-a[0][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[0][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 
 #a[0][1].set_ylabel('occurrences')
 #a[0][0].set_xlabel('residues')
 #a[0][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
 lines=a[1][0].bar(index, r3,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
-a[1][0].set_title('sim 3 3POPG_POPC IX 300-500 ns')
+#a[1][0].set_title('3POPG:POPC Jingzhaotoxin-XI 300-500 ns')
 a[1][0].set_xticks(index)
-a[1][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[1][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 a[1][0].set_ylim(0, 1) 
 a[1][0].set_xticklabels(index,fontsize=8,rotation=90)
 a[1][0].set_ylabel('occurrences')
@@ -155,22 +159,22 @@ a[1][0].set_xlabel('residues')
 #a[1][0].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
 lines=a[1][1].bar(index, r4,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
-a[1][1].set_title('sim 4 3POPC_POPG IX  300-500 ns')
+#a[1][1].set_title('3POPC:POPG Jingzhaotoxin-XI  300-500 ns')
 a[1][1].set_xticks(index)
 a[1][1].set_xticklabels(index,fontsize=8,rotation=90)
 #a[1][1].set_ylabel('occurrences')
 a[1][1].set_xlabel('residues')
 #a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 a[1][1].set_ylim(0, 1) 
-a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 
 lines=a[0][2].bar(index, r5,color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8)
-a[0][2].set_title('sim 5 POPC IX  300-500 ns')
+#a[0][2].set_title('POPC Jingzhaotoxin-XI  300-500 ns')
 a[0][2].set_xticks(index)
 a[0][2].set_xticklabels(index,fontsize=8,rotation=90)
 #a[1][1].set_ylabel('occurrences')
 #a[0][2].set_xlabel('residues')
-a[0][2].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[0][2].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 
 #a[1][1].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=5)
 
@@ -180,21 +184,23 @@ result=Trajectory.promedio_ocurrencias(r1,r2,r3,r4,r5)
 #plt.plot(time_line, r3, label='sim3')
 #plt.plot(time_line, r4, label='sim4')
 #plt.legend()
-plt.savefig("/media/eniac/mdd1/paper_membranas/xi_jinghao_toxin/residues_insert_IX.png", dpi=900)
+
 lower_error = np.divide(result[1], 5000000)
 upper_error = result[1]
 asymmetric_error = [lower_error, upper_error]
+a[1][2].set_ylim(0, 1) 
 #plt.errorbar(index, result[0], result[1], linestyle='None', marker='^')
 lines=a[1][2].bar(index, result[0],color=colors,edgecolor='gray',width = (index[1]-index[0])*0.8,yerr=asymmetric_error,capsize=2)
-a[1][2].set_title('sim Jingzhaotoxin-XI average 300-500 ns')
+#a[1][2].set_title('Jingzhaotoxin-XI average 300-500 ns')
 a[1][2].set_xticks(index)
 a[1][2].set_xticklabels(index,fontsize=8,rotation=90)
 #a[1][1].set_ylabel('occurrences')
 a[1][2].set_xlabel('residues')
-a[1][2].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=10)
+a[1][2].legend(lines, ['polar', 'no polar', 'acid','basic'], loc='upper center',bbox_to_anchor=(0.22, 0.5, 0.5, 0.5),fontsize=7)
 
-
-
+#plt.xlabel(r'\textbf{time (ns)}')
+#plt.ylabel(r'\textbf{COM distance (\AA{})}')
+plt.savefig("/home/guido/resume_paper_membranas/residues_insert_IX.png", dpi=900)
 
 #plt.bar(index, result[0],width = (index[1]-index[0])*0.8,yerr=asymmetric_error,capsize=2)
 #plt.xticks(index, index, fontsize=5, rotation=0)

@@ -215,6 +215,19 @@ class Trajectory:
             sel2_z= np.array((sel2.center(sel2.mass)[2]))
             membrane_center_mass.append(np.sqrt((sel2_z - sel1_z)**2))
         return membrane_center_mass     
+    def distance_center_mass_Z(self,atomselect1):
+        membrane_center_mass=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+        
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+           
+            #sel3 = atomsel(selection=atomselect2, molid=self.molID, frame=frame)  
+            sel1_z = np.array((sel1.center(sel1.mass)[2]))
+            membrane_center_mass.append(sel1_z)
+            
+        return membrane_center_mass     
+    
     def distance_center_mass(self,atomselect1,atomselect2):
         distance_mass_weight=[]
         for frame in range(Trajectory.num_frames(self)):
@@ -236,6 +249,7 @@ class Trajectory:
             distance_mass_weight.append(dist)
     
         return distance_mass_weight
+        
     def porcentaje_contact(self,atomselect1,atomselect2):
         protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
         #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
@@ -334,8 +348,7 @@ class Trajectory:
             
              x_up=np.asarray(x_up) 
              y_up=np.asarray(y_up) 
-             x_up=x_up.transpose() 
-             y_up=y_up.transpose() 
+         
              p_up = np.polyfit(x_up, y_up, 1)
              #print (p)
              #y_up_ajuste = p_up[0]*x_up + p_up[1]
@@ -821,3 +834,12 @@ class Trajectory:
                      print("frame "+str(frame)+"  " +str(protein.center()))
                  dew_vector.append(densidad_agua)
         return dew_vector              
+    def pdbs_from_dcd(self,atomselect1,output):
+        vector_radio=[]
+        for frame in range(Trajectory.num_frames(self)):
+            
+            #protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            #last_frame = molecule.numframes - 1
+            #atomsel.write()
+            molecule.write(self.molID, "pdb", "last_frame.pdb", first=frame)
+            #vector_radio.append(radio_giro)
