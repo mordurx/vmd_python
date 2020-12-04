@@ -21,8 +21,8 @@ sim4_dcd= "/mnt/e/paper_membranas/3popc_popg/rep3_tox_mem500.dcd"
 sim4_psf="/mnt/e/paper_membranas/3popc_popg/rep3.mem.tox.psf"
 
 ## vsdca1.1 embrionary
-sim1_dcd= "/home/mordurx/cav1.1/vs4_cav1.1e_align2.5us.dcd"
-sim1_psf="/home/mordurx/cav1.1/vs4_cav1.1e_align2.5us.psf"
+sim1_dcd= "/home/guido/cav23/vsd3_resting_2.5us_align.dcd"
+sim1_psf="/home/guido/cav23/vsd3_last_frame.Wat.psf"
 
 
 traj1=Trajectory(sim1_dcd,sim1_psf,stride=10)

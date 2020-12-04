@@ -205,17 +205,7 @@ class Trajectory:
             with open(file, 'wb') as file1:
                 np.savetxt(file1, center_mass, delimiter=' ',fmt='%.6f')     
         return center_mass  
-    def membrane_center_mass(self,atomselect1,atomselect2):
-        membrane_center_mass=[]
-        for frame in range(Trajectory.num_frames(self)):
-            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
-        
-            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
-            sel2 = atomsel(selection=atomselect2, molid=self.molID, frame=frame)
-            #sel3 = atomsel(selection=atomselect2, molid=self.molID, frame=frame)  
-            sel1_z = np.array((sel1.center(sel1.mass)[2]))
-            sel2_z= np.array((sel2.center(sel2.mass)[2]))
-            membrane_center_mass.append(np.sqrt((sel2_z - sel1_z)**2))
+    
         return membrane_center_mass     
     def distance_center_mass_Z(self,atomselect1):
         membrane_center_mass=[]
@@ -229,7 +219,14 @@ class Trajectory:
             membrane_center_mass.append(sel1_z)
             
         return membrane_center_mass     
-    
+    def get_pdb_trajectory(self,output,frame):
+        membrane_center_mass=[]
+        path_output=output+str(frame)+".pdb"
+        #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+        molecule.write(self.molID, "pdb",path_output, first=frame)
+        return path_output
+            
+        return membrane_center_mass 
     def distance_center_mass(self,atomselect1,atomselect2):
         distance_mass_weight=[]
         for frame in range(Trajectory.num_frames(self)):
