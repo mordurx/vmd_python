@@ -219,14 +219,14 @@ class Trajectory:
             membrane_center_mass.append(sel1_z)
             
         return membrane_center_mass     
-    def get_pdb_trajectory(self,output,frame):
-        membrane_center_mass=[]
-        path_output=output+str(frame)+".pdb"
+    def get_pdb_trajectory(self,output,first_frame,last_frame):
+        
+        path_output=output+str(first_frame)+".pdb"
         #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
-        molecule.write(self.molID, "pdb",path_output, first=frame)
+        molecule.write(self.molID, "pdb",path_output, first=first_frame,last=last_frame)
         return path_output
             
-        return membrane_center_mass 
+        
     def distance_center_mass(self,atomselect1,atomselect2):
         distance_mass_weight=[]
         for frame in range(Trajectory.num_frames(self)):
