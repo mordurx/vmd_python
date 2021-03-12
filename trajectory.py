@@ -142,8 +142,41 @@ class Trajectory:
     def get_molid(self):
         return self.molID
     
+    def delete_frames(self,atomselect1,cutoff,new_dcd_path,stride):
+        #hay que limpiar y depurar bien 12-03-21
+        distance_mass_weight=[]
+        count=0
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            #sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+            
+            sel1_x = np.array((sel1.center(sel1.mass)[0]))
+            sel2_y= np.array((sel1.center(sel1.mass)[1]))
+            if sel1_x < 0:
+                print ("borrando "+str(frame))
+                count=count+1
+                molecule.delframe(self.molID,frame,frame)
+                continue
+            distance_mass_weight.append(sel1_x)
+
+            #sel1.write('dcd','vsd1000.dcd')
+            #
+            #
+        print ("borrados ",count)    
+        molecule.write(self.molID,"dcd",new_dcd_path,stride)
+        
+            
+        return distance_mass_weight
     
-    
+    def center_simulations(self,atomselect1,new_dcd_path,stride):
+        #centra el dcd. similiar a vecinvert pero para trayectoria.
+        count=0
+        for frame in range(Trajectory.num_frames(self)):
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            sel1.moveby(-1*np.array((sel1.center(sel1.mass))))
+        molecule.write(self.molID,"dcd",new_dcd_path,stride)
+        
     
     @staticmethod
     def delete_frame_wrap(vector_distancia,cutoff):
@@ -693,38 +726,29 @@ class Trajectory:
         protein.write("pdb",output)
         print("cerrando molecula ",molid) 
         molecule.delete(molid)        
-    def rmsf_time(self,atomselect):
+    def rmsf_residue(self,atomselect,traj1):
         rmsd_array=[]
         
-        reference1 = atomsel(selection=atomselect, molid=self.molID, frame=1) 
-        # use frame 0 for the reference
-        reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
+
+     
+        reference = atomsel(selection=atomselect, molid=traj1.molID)
+        
+        rmsf=reference.rmsfperresidue(first=1, last=traj1.num_frames()-1)
+         #rmsf+=compare2.rmsf(frame) 
         #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
         #num residues
-        num_residues=len(pd.factorize(reference.resid)[1])
-        rmsf = np.zeros(num_residues)
+        #um_residues=len(pd.factorize(reference.resid)[1])
+        #rmsf = np.zeros(num_residues)
         
-        compare2 = atomsel(atomselect)
+        #compare2 = atomsel(atomselect)
         #set reference [atomselect $mol "protein" frame 0]
         # the frame being compared 
         #set compare [atomselect $mol "protein"]
-        for frame in range(Trajectory.num_frames(self)):
-             #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
-              # the frame being compared 
-        
-             compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
-             #set trans_mat [measure fit $compare $reference]
-             trans_mat=atomsel.fit(compare,reference)
-             # do the alignment
-             compare.move(trans_mat)
-             #$compare move $trans_mat
-             #compute the RMSD
-             #set rmsd [measure rmsd $compare $reference]
-             rmsf+=compare2.rmsf(frame)
-        newList = [x /Trajectory.num_frames(self)  for x in rmsf]
+       
+        #newList = [x /Trajectory.num_frames(self)  for x in rmsf]
         #newList = map(lambda rmsf: rmsf/int(max(rmsf)), rmsf)
         #rmsf[:]=[rmsf / int(max(rmsf)) for x in rmsf]
-        return newList
+        return rmsf
     def rmsd_vmd(self,atomselect):
          rmsd_array=[]
          # use frame 0 for the reference
