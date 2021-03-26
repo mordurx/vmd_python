@@ -31,6 +31,20 @@ class Trajectory:
         except IOError:
             print ("Could not read dcd file or psf:", dcd)
             raise Exception()
+    def __init__(self,pdb,psf=None):
+        #sobrecarga para leer pdbs y no dcd
+        try:
+            self.molID=molecule.new('pdb')
+            self.pdb=pdb
+            if psf is not None:
+                self.molID=molecule.load('psf',psf)
+                self.psf=psf # add psf
+            molecule.read(molid=self.molID,filetype ='pdb',filename=self.pdb) 
+            print (self.molID)
+        except IOError:
+            print ("Could not read dcd file or psf:",pdb)
+            raise Exception()
+
     def mean_displacement(self,atomselect1):
        
         displacement_x=[]
