@@ -7,13 +7,15 @@ Created on Fri Jun 14 15:33:39 2019
 
 @author: eniac
 """
+import random
 from numpy import savetxt
 import subprocess
-from vmd import molecule,atomsel,vmdnumpy,animate
+from vmd import molecule,atomsel,vmdnumpy,animate,trans
 import numpy as np
 import pandas as pd
 import statistics
 from sklearn import preprocessing
+import vmd
 from sklearn.linear_model import LinearRegression
 class Trajectory:
     
@@ -44,7 +46,15 @@ class Trajectory:
         except IOError:
             print ("Could not read dcd file or psf:",pdb)
             raise Exception()
-
+    
+    def get_pdb_path(self):
+        return self.pdb
+    def call_tcl(self,file_path,proc):
+        #en construccion metodo para llamar funciones desde tcl
+        vmd.evaltcl(run)
+        return vmd.evaltcl("mycenter")
+        
+        
     def mean_displacement(self,atomselect1):
        
         displacement_x=[]
@@ -130,17 +140,6 @@ class Trajectory:
        molecule.cancel
        return output
         
-#        for frame in vector_pdb:
-#            
-#            molID=molecule.load('pdb',frame)
-#            print (animate.is_active(molID)) 
-#            #molecule.read(molID,'pdb',frame)
-#            sel1 = atomsel(selection="segname TOX",molid=molID) 
-#        molecule.listall()
-#        molecule.cancel
-#        sel1.write('dcd','vsd1000.dcd')
-#       
-        #return molecule.listall()
 
         
     def close (self):
