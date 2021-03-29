@@ -41,7 +41,7 @@ class Trajectory:
             if psf is not None:
                 self.molID=molecule.load('psf',psf)
                 self.psf=psf # add psf
-            molecule.read(molid=self.molID,filetype ='pdb',filename=self.pdb) 
+            molecule.read(molid=self.molID,filetype ='pdb',filename=self.pdb,first=0,last=0) 
             print (self.molID)
         except IOError:
             print ("Could not read dcd file or psf:",pdb)

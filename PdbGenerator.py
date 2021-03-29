@@ -22,8 +22,51 @@ class PdbGenerator(Trajectory):
         self.__atom_seletion = value    
     @output.setter
     def output(self, value):
-        self.__output = value 
-    def self_assembly(self,box_size):
+        self.__output = value
+    # Function to demo the readlines() function
+    def readFile(self):
+        rd = open (self.pdb, "r")
+
+        # Read list of lines
+        out = [] # list to save lines
+        while True:
+            # Read next line
+            line = rd.readline()
+            # If line is blank, then you struck the EOF
+            if not line  :
+                break
+            elif line.rfind("ATOM")==-1:
+                continue
+            out.append(line)
+        
+        # Close file 
+        rd.close()
+        
+        return out    
+    def generate_random_poses_from_element(self,box_size,num_poses):
+        #$malo revisar hay que hacar para lipis or protein diferente
+        new_pdb = open(self.output, "w")
+        outList=self.readFile()
+        memb = atomsel(self.__atom_seletion)
+        resname_memb=memb.resname
+        num_lipids=memb.resid[-1]
+        atom_number=1
+        for i in range(1,num_poses+1):
+            for line in outList:
+                print(line)
+                #ind=line.find(resname_memb[0])
+                #last=line.index(" ",ind)
+                line=line.replace(line[:11],line[:11-len(str(atom_number))]+str(atom_number))
+                line=line.replace(line[:26],line[:26-len(str(i))]+str(i))
+                
+                #line=line.replace(line[ind:last+4], resname_memb[0]+"   "+str(i))
+                
+                #line=line.replace(line[:11],line[:11-len(str(atom_number))]+str(atom_number))
+                new_pdb.write(line)
+                atom_number=atom_number+1 
+        new_pdb.close()    
+    def sort_random_sel(self,box_size):
+        #dado un pdb con multiple elementos , los reordena aleatoreamente
         x0=box_size[0][0]
         y0=box_size[0][1]
         z0=box_size[0][2]
