@@ -18,9 +18,33 @@ from sklearn import preprocessing
 import vmd
 from sklearn.linear_model import LinearRegression
 class Trajectory:
-    
-    
-    def __init__(self,dcd,psf,first=0,last=-1,stride=1,waitfor=-1):
+    def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None):
+        
+        self.molID=0
+        if psf is not None:
+                self.psf = psf
+                self.molID=molecule.load('psf',psf)
+        if  (pdb is None) and (dcd is not None):
+            try:
+                self.dcd = dcd
+                self.molID=molecule.new('new')
+                self.molID=molecule.load('psf',self.psf) # load trajectory
+                molecule.read(self.molID,'dcd',self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
+                print ("DCD file detected id ",self.molID)
+            except IOError:
+                print ("Could not read dcd file or psf:", dcd)
+                raise Exception()
+        else:
+            try:
+                self.molID=molecule.new('pdb')
+                self.pdb=pdb
+                molecule.read(molid=self.molID,filetype ='pdb',filename=self.pdb,first=0,last=0) 
+                print ("pdb file detected id ",self.molID)
+            except IOError:
+                print ("Could not read dcd file or psf:",pdb)
+                raise Exception()
+    @classmethod
+    def dcd(self,dcd,psf,first=0,last=-1,stride=1,waitfor=-1):
         self.psf = psf
         self.dcd = dcd
         self.molID=0
@@ -33,7 +57,7 @@ class Trajectory:
         except IOError:
             print ("Could not read dcd file or psf:", dcd)
             raise Exception()
-    def __init__(self,pdb,psf=None):
+    def pdb(self,pdb,psf=None):
         #sobrecarga para leer pdbs y no dcd
         try:
             self.molID=molecule.new('pdb')
