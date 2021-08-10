@@ -178,7 +178,22 @@ class Trajectory:
        
     def get_molid(self):
         return self.molID
-    
+    def get_membrane_outer_distance(self,sel_name_P,membrane):
+        pos_z=[]
+        #obtiene un promedio la las cabezas fosfolipidas en z por cada frame
+        for frame in range(Trajectory.num_frames(self)):
+            #seleciono la cabezas
+            sel1 = atomsel(selection=sel_name_P, molid=self.molID, frame=frame)
+            sel= sel1.centerperresidue(sel1.mass)
+            name_p_z=(list(zip(*sel))[2])
+            mean=np.mean(name_p_z)
+            #membrane
+            selM= atomsel(selection=membrane, molid=self.molID, frame=frame)
+            sel= selM.center(selM.mass)[2]
+            
+            pos_z.append(np.abs(mean-sel))
+        return pos_z    
+
     def delete_frames(self,atomselect1,cutoff,new_dcd_path,stride):
         #hay que limpiar y depurar bien 12-03-21
         distance_mass_weight=[]
@@ -224,16 +239,11 @@ class Trajectory:
         for i in vector_distancia:
             if np.abs(valor_anterior-j)>=cutoff:
                     del vector_distancia[cont]
-                    print ('deleting.. frame',cont)
-                    
-                
+                    print ('deleting.. frame',cont)        
             else:
                 vector_new_distance.append(i)
                 valor_anterior=j
             cont=cont+1
-            
-                
-            
         return vector_new_distance
 
 
@@ -288,7 +298,12 @@ class Trajectory:
             sel1_z = np.array((sel1.center(sel1.mass)[2]))
             membrane_center_mass.append(sel1_z)
             
-        return membrane_center_mass     
+        return membrane_center_mass
+    @staticmethod    
+    def to_csv(df,mode="w",sep=",",output="",header=True,index=False):
+        #las lista deben tener el mismo size
+        df.to_csv(mode=mode,path_or_buf=output, header=header, index=index,sep=sep)    
+                 
     def get_pdb_trajectory(self,output,first_frame,last_frame):
         
         path_output=output+str(first_frame)+".pdb"
