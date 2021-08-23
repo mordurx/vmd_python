@@ -475,7 +475,7 @@ class Trajectory:
         
     
     def get_residue_insert_mem_per_frame(self,frame,membrane,fosfolipid_head_select,protein_select):
-        inserted_residues2=[]
+        inserted_residues=[]
         protein  = atomsel(selection=protein_select, molid=self.molID, frame=frame) 
         resid_center=protein.centerperresidue()
         resid_z=list(map(lambda x: x, resid_center))     
