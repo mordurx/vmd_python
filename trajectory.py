@@ -18,19 +18,28 @@ from sklearn import preprocessing
 import vmd
 from sklearn.linear_model import LinearRegression
 class Trajectory:
-    def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None):
+    def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None,type_format="NAMD"):
         
+        if type_format=="GROMACS":
+            traj_format="xtc"
+            top_format="gro"
+        if type_format=="NAMD":
+            traj_format="dcd"
+            top_format="psf"
+        if type_format=="test":
+            traj_format="dcd"
+            top_format="gro"
         self.molID=0
         if psf is not None:
                 self.psf = psf
-                self.molID=molecule.load('psf',psf)
+                self.molID=molecule.load(top_format,psf)
         if  (pdb is None) and (dcd is not None):
             try:
                 self.dcd = dcd
                 self.molID=molecule.new('new')
-                self.molID=molecule.load('psf',self.psf) # load trajectory
-                molecule.read(self.molID,'dcd',self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
-                print ("DCD file detected id ",self.molID)
+                self.molID=molecule.load(top_format,self.psf) # load trajectory
+                molecule.read(self.molID,traj_format,self.dcd,stride=stride,first=first,last=last,waitfor=waitfor) 
+                print (traj_format+" file detected id ",self.molID)
             except IOError:
                 print ("Could not read dcd file or psf:", dcd)
                 raise Exception()
@@ -178,6 +187,23 @@ class Trajectory:
        
     def get_molid(self):
         return self.molID
+    def minmax(self,atomselect1):
+        list_x=[]
+        list_y=[]
+        list_z=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #seleciono la cabezas
+            sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+            sel_x= list_x.append(np.abs(sel1.minmax()[0][0]-sel1.minmax()[1][0]))
+            sel_y= list_y.append(np.abs(sel1.minmax()[0][1]-sel1.minmax()[1][1]))
+            sel_z= list_z.append(np.abs(sel1.minmax()[0][2]-sel1.minmax()[1][2]))
+            sel_down= sel1.minmax()[1]
+            
+            
+        #x = statistics.mean(data)
+        #y = statistics.mean(data)
+        #z = statistics.mean(data)
+        return [list_x,list_y,list_z]   
     def get_membrane_outer_distance(self,sel_name_P,membrane):
         pos_z=[]
         #obtiene un promedio la las cabezas fosfolipidas en z por cada frame
@@ -333,6 +359,27 @@ class Trajectory:
             distance_mass_weight.append(dist)
     
         return distance_mass_weight
+    def distance_center_mass_Z(self,atomselect1,atomselect2):
+        distance_mass_weight=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+        
+            sel1 =atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+            sel1_z = np.array((sel1.center(sel1.mass)[2]))
+            sel2_z= np.array((sel2.center(sel2.mass)[2]))
+            
+            #sel1_x = np.array((sel1.center(sel1.mass)[0]))
+            #sel2_x= np.array((sel2.center(sel2.mass)[0]))
+            
+            #sel1_y = np.array((sel1.center(sel1.mass)[1]))
+            #sel2_y= np.array((sel2.center(sel2.mass)[1]))
+            
+            
+            dist = np.sqrt((sel2_z - sel1_z)**2)  
+            distance_mass_weight.append(dist)
+    
+        return distance_mass_weight
         
     def porcentaje_contact(self,atomselect1,atomselect2):
         protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
@@ -373,9 +420,44 @@ class Trajectory:
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
     
         return ocurrencias_vector/Trajectory.num_frames(self)
+    def contact_time(self,atomselect1,atomselect2,cutoff):
+        dict_resid_count={}
+        # cuantos contactos tiene un ligando a cierto receptor by cutoff
+        
+        for frame in range(Trajectory.num_frames(self)):
+             sel  = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+             receptor  = atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+             contact=sel.contacts(receptor,cutoff)
+             #la primera lista index del lig
+             #segunda lista atom que hacen contacto
+             aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
+     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H'}
+             #dejar solo valores unicos, no nos intereza el analisis de enlaces
+             if len(contact[1])==0:
+                 print("vacioo")
+                 continue
+             unique_contact=list(set(contact[1]))
+             unique_index = ' '.join([str(elem) for elem in unique_contact])
+             unique_resid = atomsel(selection="index "+unique_index, molid=self.molID, frame=frame)
+             unique_contact=list(set(unique_resid.resid))
+           
+             for atom in unique_contact:
+                 resid = atomsel(selection="resid "+str(atom), molid=self.molID, frame=frame)
+                 resid=list(set(resid.resname))
+                 get_one_letter_amino=aminoacid[resid[0]]
+                 if str(atom)+get_one_letter_amino in dict_resid_count.keys():
+                     #print("existe residuo")
+                     dict_resid_count[str(atom)+get_one_letter_amino]=dict_resid_count[str(atom)+get_one_letter_amino]+1
+                 else:
+                     dict_resid_count[str(atom)+get_one_letter_amino]=1
+        return dict_resid_count     
+        
     def porcentaje_contact_fit(self,atomselect1,atomselect2,first,last):
         """
-        este metodo la colision  del residuo a la cabezas de Posfato de la membrana.
+        insercion en membrane del residuo a los Posfato de la membrana, tambien devuelve el frame
+        la primera insercion
         1) get prot and name P
         2) detectar cabezas fosfolipidas de la membrana y clasificar arriba y abajo
         2.1) the mass of center of membrane was obtained to get a measure than who is up and down, so 
@@ -383,7 +465,7 @@ class Trajectory:
         2.3) obtener coord x,z y realizar un ajutes de minimos cuadrados sobre los puntos
         2.4) la coord pred(y) sera utilizada como limite para calcular la colision. 
         2.5) usar los coeficientes para calcular la distancia del punto a la recta.
-        2.51) evaluo la distancia en x en la funcion ax+b= z y los comparo con mi z del name P    
+        2.51) evaluo la distancia en x en la funcion polyfit 1 y los comparo con mi z del name P    
         2.6) todo lo que este dentro de las rectas es colision
         """
         
@@ -394,7 +476,7 @@ class Trajectory:
         #num_residues=len(pd.factorize(protein.resid)[1])
         ocurrencias_vector=[]
         ocurrencias_temp=[]
-              
+        frame_first_insertion=0      
         for frame in range(first,last):
              protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
              # use frame 0 for the reference
@@ -415,7 +497,7 @@ class Trajectory:
              #print (mem_mass_center_Z)
              
              #outerleaf
-             name_P_down=atomsel(selection="name P and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             name_P_down=atomsel(selection=atomselect2+" and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              
              x_down=np.asarray(name_P_down.x) 
              y_down=np.asarray(name_P_down.z) 
@@ -426,7 +508,7 @@ class Trajectory:
              #y_down_ajuste = p_down[0]*x_down + p_down[1]
              
              #inner leaf
-             name_P_up=atomsel(selection="name P and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             name_P_up=atomsel(selection=atomselect2+" and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
              x_up = name_P_up.x
              y_up = name_P_up.z
             
@@ -456,7 +538,9 @@ class Trajectory:
                  y_up_ajuste = p_up[0]*x_residue + p_up[1]
                  
                  if resid_z[number_resid][2]<y_up_ajuste and resid_z[number_resid][2]>y_down_ajuste:
-                     #print ("choca"+str(number_resid)+' '+str(frame))
+                     if np.count_nonzero(ocurrencias_vector)==0:
+                        frame_first_insertion=frame
+                        #print ("choca"+str(number_resid)+' '+str(frame))
                      
                      ocurrencias_temp[number_resid]=1 
                  else:
@@ -473,6 +557,101 @@ class Trajectory:
     
         return ocurrencias_vector/(last-first)
         
+    def insertions_reach_membrane(self,atomselect1,atomselect2,first,last):
+        """
+        insercion en membrane del residuo a los Posfato de la membrana, tambien devuelve el frame
+        la primera insercion
+        1) get prot and name P
+        2) detectar cabezas fosfolipidas de la membrana y clasificar arriba y abajo
+        2.1) the mass of center of membrane was obtained to get a measure than who is up and down, so 
+        2.2) name P > centro de masa de menbrana , name P de arriba, caso contrario es abajo.
+        2.3) obtener coord x,z y realizar un ajutes de minimos cuadrados sobre los puntos
+        2.4) la coord pred(y) sera utilizada como limite para calcular la colision. 
+        2.5) usar los coeficientes para calcular la distancia del punto a la recta.
+        2.51) evaluo la distancia en x en la funcion polyfit 1 y los comparo con mi z del name P    
+        2.6) todo lo que este dentro de las rectas es colision
+        """
+        
+        
+        protein = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
+             #num residuesatomselect1
+        #num_residues=len(pd.factorize(protein.resid)[1])
+        ocurrencias_vector=[]
+        ocurrencias_temp=[]
+        frame_first_insertion=0      
+        for frame in range(first,last):
+             protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             # use frame 0 for the reference
+             #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+             resid_center=protein.centerperresidue()
+             #center de masa del la proteina
+             #protein_center=atomsel(selection="protein", molid=self.molID, frame=frame)
+             protein_center_Z=protein.center(protein.mass)[2]
+             
+             if frame==first:
+                 ocurrencias_vector= np.zeros(len(resid_center))
+                 ocurrencias_temp=np.zeros(len(resid_center))
+        
+        
+            
+             resid_z=list(map(lambda x: x, resid_center))
+             nameP_z=list(map(lambda x: x[2], sel2.minmax()))
+             #print(nameP_z)
+             membrane=atomsel(selection="resname POPC POPG", molid=self.molID, frame=frame)
+             mem_mass_center_Z=membrane.center(membrane.mass)[2]
+             #print (mem_mass_center_Z)
+             
+             #outerleaf
+             name_P_down=atomsel(selection=atomselect2+" and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             
+             x_down=np.asarray(name_P_down.x) 
+             y_down=np.asarray(name_P_down.z) 
+             x_down=x_down.transpose() 
+             y_down=y_down.transpose() 
+             p_down = np.polyfit(x_down, y_down, 1)
+             #print (p)
+             #y_down_ajuste = p_down[0]*x_down + p_down[1]
+             
+             #inner leaf
+             name_P_up=atomsel(selection=atomselect2+" and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             x_up = name_P_up.x
+             y_up = name_P_up.z
+            
+             x_up=np.asarray(x_up) 
+             y_up=np.asarray(y_up) 
+         
+             p_up = np.polyfit(x_up, y_up, 1)
+             #print (p)
+             #y_up_ajuste = p_up[0]*x_up + p_up[1]
+             
+             
+             #distancia=  (p[0]*x + p[1])/(np.sqrt(p[0]**2+p[1]**2))
+             #print (distancia)
+             #x.reshape((1, -1))
+             #y.reshape((1,-1))
+             #model = LinearRegression()
+             #model.fit(x, y)
+             
+             #axis_z_ajust=model.predict(x)
+             #print(statistics.mean(axis_z_ajust[0]))
+             #print('Coefficients: \n', model.coef_)
+             #recta=A*x+B*x
+             #print (len(resid_z))
+             for number_resid in range(len(resid_z)):
+                 x_residue=resid_z[number_resid][0]
+                 y_down_ajuste = p_down[0]*x_residue + p_down[1]
+                 y_up_ajuste = p_up[0]*x_residue + p_up[1]
+                 
+                 if resid_z[number_resid][2]<y_up_ajuste and resid_z[number_resid][2]>y_down_ajuste:
+                     #if np.count_nonzero(ocurrencias_vector)==0:
+                    if protein_center_Z<y_up_ajuste+5 and protein_center_Z> y_down_ajuste-5: 
+                        frame_first_insertion=frame
+                        print ("choca",str(number_resid),str(frame),protein_center_Z,y_up_ajuste,y_down_ajuste)
+                        return frame_first_insertion
+                     
+        return frame_first_insertion
     
     def get_residue_insert_mem_per_frame(self,frame,membrane,fosfolipid_head_select,protein_select):
         inserted_residues=[]
@@ -751,17 +930,18 @@ class Trajectory:
          return rmsd_array
     @staticmethod     
     def promedio_ocurrencias(*args):
+        #ocurrence= np.array(args)
         ocurrence=np.transpose(args)
         value = 0
         mean_residues=[]
-        std_residues=[]
+        std_error_residues=[]
         for x in ocurrence:
             
-            std_residues.append(np.std(x))
+            std_error_residues.append(np.std(x, ddof=1) / np.sqrt(np.size(x)))
             mean_residues.append(np.mean(x))
             #0.42:0.1805
-            print (np.sum(x[0]))
-        return [mean_residues,std_residues]
+            #print (np.sum(x[0]))
+        return [mean_residues,std_error_residues]
     @staticmethod     
     def set_beta_factor(residue_occupancy:list, query,molid:int,output:str):
         """
@@ -773,7 +953,7 @@ class Trajectory:
         """
         protein = atomsel(query)
         for x in protein.resid:
-            atomsel("protein and resid "+str(x)).beta=residue_occupancy[x-1]
+            atomsel(query+" and resid "+str(x)).beta=residue_occupancy[x-1]
             print(x,residue_occupancy[x-1])
         protein.write("pdb",output)
         print("cerrando molecula ",molid) 
@@ -851,21 +1031,59 @@ class Trajectory:
             #newList = map(lambda rmsf: rmsf/int(max(rmsf)), rmsf)
             #rmsf[:]=[rmsf / int(max(rmsf)) for x in rmsf]
             return rmsf
-        
-    def SASA(self,atomselect):
+    def rmsf_ligand(self,atomselect):
+            # rmsf para ligando no residues
+            # use frame 0 for the reference
+            reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
+            #reference1 = atomsel(selection="protein", molid=self.molID, frame=0) 
+            #num residues
+           
+            rmsf = np.zeros(len(reference.index))
+            
+            #compare2 = atomsel(atomselect)
+            #set reference [atomselect $mol "protein" frame 0]
+            # the frame being compared 
+            #set compare [atomselect $mol "protein"]
+            mask = vmdnumpy.atomselect(molid=self.molID, frame=0,selection=atomselect)
+            ref = np.compress(mask, vmdnumpy.timestep(self.molID, 0), axis=0)
+            
+            for frame in range(Trajectory.num_frames(self)):
+                 #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
+                  # the frame being compared 
+                 frame = np.compress(mask, vmdnumpy.timestep(self.molID, frame), axis=0)
+                 rmsf += np.sqrt(np.sum((frame-ref)**2, axis=1))
+                 #compare = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
+                 #set trans_mat [measure fit $compare $reference]
+                 #trans_mat=atomsel.fit(compare,reference)
+                 # do the alignment
+                 #compare.move(trans_mat)
+                 #$compare move $trans_mat
+                 #compute the RMSD
+                 #set rmsd [measure rmsd $compare $reference]
+                 #rmsf+=compare2.rmsf(frame)
+            rmsf /= float(Trajectory.num_frames(self)-0)
+            rmsf = np.sqrt(rmsf)     
+            #newList = [x /Trajectory.num_frames(self)  for x in rmsf]
+            #newList = map(lambda rmsf: rmsf/int(max(rmsf)), rmsf)
+            #rmsf[:]=[rmsf / int(max(rmsf)) for x in rmsf]
+            return rmsf    
+    def SASA_percent(self,receptor_sel,ligand_sel):
+        #get percent solvent accssibility of a ligand
         sasa_vector=[]
         for frame in range(Trajectory.num_frames(self)):
-                 lig_sel  = atomsel(selection="resname LEU ILE VAL ALA PHE TRP MET", molid=self.molID, frame=frame) 
-                 big_sel  = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
+                 lig_sel  = atomsel(selection=ligand_sel, molid=self.molID, frame=frame) 
+                 big_sel  = atomsel(selection=receptor_sel, molid=self.molID, frame=frame) 
                  #>>> big_sel = atomsel('protein or resname LIG')
                  #>>> lig_sel = atomsel('resname LIG')
                  ligand_in_protein_sasa = big_sel.sasa(srad=1.4, restrict=lig_sel)
                  #ligand_in_protein_sasa = big_sel.sasa(srad=1.4)
                  
+                 ligand_alone_sasa, points = lig_sel.sasa(srad=1.4, points=True)
+                 #print(100. * ligand_in_protein_sasa / ligand_alone_sasa)
                  #ligand_alone_sasa= lig_sel.sasa(srad=1.4, points=True)
                  if (frame % 100)==0:
                      print("frame "+str(frame)+"  " +str(ligand_in_protein_sasa ))
-                 sasa_vector.append(ligand_in_protein_sasa)
+                 sasa_vector.append(100. * ligand_in_protein_sasa / ligand_alone_sasa)
         return sasa_vector               
     def Dewetting(self,sel1,sel2, first, last):
         dew_vector=[]
