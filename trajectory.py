@@ -82,10 +82,32 @@ class Trajectory:
     
     def get_pdb_path(self):
         return self.pdb
-    def call_tcl(self,file_path,proc):
-        #en construccion metodo para llamar funciones desde tcl
-        vmd.evaltcl(run)
-        return vmd.evaltcl("mycenter")
+    def tcl_dipoleZ(self,file_path,proc):
+        #calcula el dipolo a partir de tcl file.
+        Cosangle=[]
+        magnitude_prot_vector=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #seleciono la cabezas
+            #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+            vmd.evaltcl("source "+file_path)
+            result=vmd.evaltcl(proc+" "+str(self.molID)+" "+str(frame))
+            dip_prot=np.fromstring(result, dtype=float, sep=' ')
+            axis_z=[0,0,1]
+            
+            #magnitude vector dipole
+            magnitude_dip = np.linalg.norm(dip_prot)
+            magnitude_z_axis = np.linalg.norm(axis_z)
+            #print(magnitude_dip)
+            #print(magnitude_z_axis)
+            
+            #prod punto entre dipolo protein y eje z
+            prod_dot=np.dot(dip_prot,axis_z)
+            cos_teta=prod_dot/(magnitude_dip*magnitude_z_axis)
+            Cosangle.append(cos_teta)
+            magnitude_prot_vector.append(magnitude_dip)
+            #print(np.fromstring(result, dtype=float, sep=' '))
+            
+        return magnitude_prot_vector,Cosangle
         
         
     def mean_displacement(self,atomselect1):
