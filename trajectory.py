@@ -88,12 +88,19 @@ class Trajectory:
         magnitude_prot_vector=[]
         for frame in range(Trajectory.num_frames(self)):
             #seleciono la cabezas
-            #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+            sel1 = atomsel(selection="protein", molid=self.molID, frame=frame)
+            prot_z=sel1.center(sel1.mass)[2]
             vmd.evaltcl("source "+file_path)
             result=vmd.evaltcl(proc+" "+str(self.molID)+" "+str(frame))
             dip_prot=np.fromstring(result, dtype=float, sep=' ')
-            axis_z=[0,0,1]
-            
+            if prot_z >0:
+                axis_z=[0,0,1]
+                #print ("arriba",frame)
+                
+                
+            else:
+                axis_z=[0,0,-1]
+                #print ("abajo")
             #magnitude vector dipole
             magnitude_dip = np.linalg.norm(dip_prot)
             magnitude_z_axis = np.linalg.norm(axis_z)
@@ -107,7 +114,7 @@ class Trajectory:
             magnitude_prot_vector.append(magnitude_dip)
             #print(np.fromstring(result, dtype=float, sep=' '))
             
-        return magnitude_prot_vector,Cosangle
+        return magnitude_prot_vector,Cosangle,np.degrees(np.arccos(Cosangle)).tolist()
         
         
     def mean_displacement(self,atomselect1):
@@ -272,12 +279,38 @@ class Trajectory:
     def center_simulations(self,atomselect1,new_dcd_path,stride):
         #centra el dcd. similiar a vecinvert pero para trayectoria.
         count=0
+        frame=1
         for frame in range(Trajectory.num_frames(self)):
+            print(frame)
+            sel_all= atomsel(selection="all", molid=self.molID, frame=frame) 
             sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
-            sel1.moveby(-1*np.array((sel1.center(sel1.mass))))
+            sel_all.moveby(-1*np.array((sel1.center(sel1.mass))))
         molecule.write(self.molID,"dcd",new_dcd_path,stride)
+    @staticmethod
+    def to_excel(output,sheet,mode,**kwargs):
+        columns = ['index 34843 or (resname 01X and index 4)', 'probability']
+        df = pd.DataFrame.from_dict(kwargs["data"].items())
+        if not df.empty:
+            df.columns=columns
+        else:
+            pd.DataFrame(columns=columns)    
+        #df = pd.DataFrame.from_dict(kwargs["data"].items())
+        #columns =["500ns dipole","500ns cos θ","500ns θ"])
+        #pd.set_option('display.max_rows', 6500)
+        #pd.set_option('display.max_columns', 6500)
+        #pd.set_option('display.width', 6000)
+        writer = pd.ExcelWriter(output, engine='openpyxl',mode=mode)
+        #pd.set_option('display.max_columns', 2000)  # or 1000
+        df.to_excel(writer, sheet_name=sheet, index=False)
+        # Auto-adjust columns' width
+        #writer.set_default_row(hide_unused_rows=True)
         
-    
+        #for column in df:
+        #    column_length = max(df[column].astype(str).map(len).max(), len(column))
+            #col_idx = df.columns.get_loc(column)
+            #writer.sheets['H-BOND'].column_dimensions(col_idx, col_idx, column_length)
+        
+        writer.save()
     @staticmethod
     def delete_frame_wrap(vector_distancia,cutoff):
         "aun no completoooo no usarr 5 sep 2020"
@@ -1089,24 +1122,43 @@ class Trajectory:
             #newList = map(lambda rmsf: rmsf/int(max(rmsf)), rmsf)
             #rmsf[:]=[rmsf / int(max(rmsf)) for x in rmsf]
             return rmsf    
-    def SASA_percent(self,receptor_sel,ligand_sel):
+    def SASA_percent(self,complejo,ligand_sel):
         #get percent solvent accssibility of a ligand
         sasa_vector=[]
         for frame in range(Trajectory.num_frames(self)):
                  lig_sel  = atomsel(selection=ligand_sel, molid=self.molID, frame=frame) 
-                 big_sel  = atomsel(selection=receptor_sel, molid=self.molID, frame=frame) 
-                 #>>> big_sel = atomsel('protein or resname LIG')
-                 #>>> lig_sel = atomsel('resname LIG')
-                 ligand_in_protein_sasa = big_sel.sasa(srad=1.4, restrict=lig_sel)
-                 #ligand_in_protein_sasa = big_sel.sasa(srad=1.4)
+                 complejo_lig_prot  = atomsel(selection=complejo, molid=self.molID, frame=frame) 
                  
-                 ligand_alone_sasa, points = lig_sel.sasa(srad=1.4, points=True)
-                 #print(100. * ligand_in_protein_sasa / ligand_alone_sasa)
-                 #ligand_alone_sasa= lig_sel.sasa(srad=1.4, points=True)
-                 if (frame % 100)==0:
-                     print("frame "+str(frame)+"  " +str(ligand_in_protein_sasa ))
-                 sasa_vector.append(100. * ligand_in_protein_sasa / ligand_alone_sasa)
-        return sasa_vector               
+                 lig_sel_sasa = lig_sel.sasa(srad=1.4, restrict=lig_sel)
+                 complejo_lig_prot_sasa = complejo_lig_prot.sasa(srad=1.4, restrict=complejo_lig_prot)
+                 if frame%100:
+                     print("frame "+str(frame)+"  " +str(complejo_lig_prot_sasa )+"-" +str(lig_sel_sasa ))
+                 sasa_vector.append(complejo_lig_prot_sasa - lig_sel_sasa)
+        return sasa_vector
+    def H_bond(self,sel1,sel2,output,cutoff,sheet,mode):
+        #get percent solvent accssibility of a ligand
+        H_bond_vector=[]
+        dict_hbond={}
+        for frame in range(Trajectory.num_frames(self)):
+                 sel_1  = atomsel(selection=sel1, molid=self.molID, frame=frame) 
+                 sel_2  = atomsel(selection=sel2, molid=self.molID, frame=frame) 
+                 lig_sel_sasa = sel_1.hbonds(cutoff=cutoff,maxangle=180,acceptor=sel_2)
+                 #H_bond_vector.append(lig_sel_sasa)
+                 for data in range(len(lig_sel_sasa[0])):
+                     
+                     sel_A  = atomsel(selection="index "+str(lig_sel_sasa[0][data]), molid=self.molID, frame=frame)
+                     sel_B  = atomsel(selection="index "+str(lig_sel_sasa[1][data]), molid=self.molID, frame=frame)
+                     sel_H  = atomsel(selection="index "+str(lig_sel_sasa[2][data]), molid=self.molID, frame=frame)
+                     idUnique=str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"-"+str(sel_A.index[0])+str("-")+str(sel_H.name)+str("-")+str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"-"+str(sel_B.index[0])
+                     if idUnique in dict_hbond.keys():
+                        print ("ex")
+                        dict_hbond[idUnique]=1+dict_hbond[idUnique]
+                     else:
+                        print ("not")
+                        dict_hbond[idUnique]=1
+        for key in dict_hbond:
+            dict_hbond[key]= dict_hbond[key]/ Trajectory.num_frames(self)               
+        self.to_excel(output=output,data=dict_hbond,sheet=sheet, mode=mode)               
     def Dewetting(self,sel1,sel2, first, last):
         dew_vector=[]
         radio_vect=Trajectory.average_radius_of_gyration(self, sel1)
