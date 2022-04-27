@@ -7,6 +7,7 @@ Created on Fri Jun 14 15:33:39 2019
 
 @author: eniac
 """
+import collections
 import random
 from numpy import savetxt
 import subprocess
@@ -288,28 +289,23 @@ class Trajectory:
         molecule.write(self.molID,"dcd",new_dcd_path,stride)
     @staticmethod
     def to_excel(output,sheet,mode,**kwargs):
-        columns = ['index 34843 or (resname 01X and index 4)', 'probability']
-        df = pd.DataFrame.from_dict(kwargs["data"].items())
+        columns = ["frame","event","contact","occupancy %"]
+        df = pd.DataFrame(columns = columns)
+        df["frame"] = pd.Series(kwargs["numHbound"].keys())
+        df["event"] = pd.Series(kwargs["numHbound"].values())
+        df["contact"] = pd.Series(kwargs["resume"].keys())
+        df["occupancy %"] = pd.Series(kwargs["resume"].values())
+        
         if not df.empty:
             df.columns=columns
         else:
-            pd.DataFrame(columns=columns)    
-        #df = pd.DataFrame.from_dict(kwargs["data"].items())
-        #columns =["500ns dipole","500ns cos θ","500ns θ"])
-        #pd.set_option('display.max_rows', 6500)
-        #pd.set_option('display.max_columns', 6500)
-        #pd.set_option('display.width', 6000)
+            pd.DataFrame(columns=columns)
         writer = pd.ExcelWriter(output, engine='openpyxl',mode=mode)
-        #pd.set_option('display.max_columns', 2000)  # or 1000
         df.to_excel(writer, sheet_name=sheet, index=False)
-        # Auto-adjust columns' width
-        #writer.set_default_row(hide_unused_rows=True)
-        
-        #for column in df:
-        #    column_length = max(df[column].astype(str).map(len).max(), len(column))
-            #col_idx = df.columns.get_loc(column)
-            #writer.sheets['H-BOND'].column_dimensions(col_idx, col_idx, column_length)
-        
+        writer.sheets[sheet].column_dimensions['A'].width = 10
+        writer.sheets[sheet].column_dimensions['B'].width = 10
+        writer.sheets[sheet].column_dimensions['C'].width = 30
+        writer.sheets[sheet].column_dimensions['D'].width = 30
         writer.save()
     @staticmethod
     def delete_frame_wrap(vector_distancia,cutoff):
@@ -1135,30 +1131,50 @@ class Trajectory:
                      print("frame "+str(frame)+"  " +str(complejo_lig_prot_sasa )+"-" +str(lig_sel_sasa ))
                  sasa_vector.append(complejo_lig_prot_sasa - lig_sel_sasa)
         return sasa_vector
-    def H_bond(self,sel1,sel2,output,cutoff,sheet,mode):
+    def Water_Hbond(self,donor,aceptor,output,cutoff,sheet,angle,mode,water,only_polar=True):
         #get percent solvent accssibility of a ligand
         H_bond_vector=[]
         dict_hbond={}
+        summary_hbound={}
+        number_hbond={}
         for frame in range(Trajectory.num_frames(self)):
-                 sel_1  = atomsel(selection=sel1, molid=self.molID, frame=frame) 
-                 sel_2  = atomsel(selection=sel2, molid=self.molID, frame=frame) 
-                 lig_sel_sasa = sel_1.hbonds(cutoff=cutoff,maxangle=180,acceptor=sel_2)
+                 sel_1  = atomsel(selection=donor, molid=self.molID, frame=frame) 
+                 sel_2  = atomsel(selection=aceptor, molid=self.molID, frame=frame) 
+                 lig_sel_sasa = sel_1.hbonds(cutoff=cutoff,maxangle=angle,acceptor=sel_2)
                  #H_bond_vector.append(lig_sel_sasa)
-                 for data in range(len(lig_sel_sasa[0])):
-                     
+                 number_hbond[frame]=0
+                 dict_aux={}
+                 for data in range(len(lig_sel_sasa[1])):
                      sel_A  = atomsel(selection="index "+str(lig_sel_sasa[0][data]), molid=self.molID, frame=frame)
                      sel_B  = atomsel(selection="index "+str(lig_sel_sasa[1][data]), molid=self.molID, frame=frame)
                      sel_H  = atomsel(selection="index "+str(lig_sel_sasa[2][data]), molid=self.molID, frame=frame)
-                     idUnique=str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"-"+str(sel_A.index[0])+str("-")+str(sel_H.name)+str("-")+str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"-"+str(sel_B.index[0])
-                     if idUnique in dict_hbond.keys():
-                        print ("ex")
-                        dict_hbond[idUnique]=1+dict_hbond[idUnique]
+                     
+                     if water=="acceptor":
+                         ligand_atom=str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"---"+str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"-"+str(sel_A.index[0])
+                     elif water=="donor":
+                         ligand_atom=str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"---"+str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"-"+str(sel_B.index[0])
                      else:
-                        print ("not")
-                        dict_hbond[idUnique]=1
-        for key in dict_hbond:
-            dict_hbond[key]= dict_hbond[key]/ Trajectory.num_frames(self)               
-        self.to_excel(output=output,data=dict_hbond,sheet=sheet, mode=mode)               
+                         return print("water, only canbe donor or acceptor")
+                     if only_polar==True:
+                         polar_allowing=['N','O','S','F']
+                         #print ("only polar active",polar_allowing)
+                         if any(x in sel_A.type[0][0] for x in polar_allowing) and any(x in sel_B.type[0][0] for x in polar_allowing):
+                             number_hbond[frame]=number_hbond[frame]+1
+                             if ligand_atom not in dict_aux.keys():
+                                dict_aux[ligand_atom]=1
+                           
+                      
+                     else:
+                         if ligand_atom not in dict_aux.keys():
+                            dict_aux[ligand_atom]=1
+                         number_hbond[frame]=number_hbond[frame]+1
+                 dict_aux = collections.Counter(dict_aux)
+                 summary_hbound = collections.Counter(summary_hbound)        
+                 summary_hbound=summary_hbound+dict_aux    
+                            
+        #for key in dict_hbond:
+        #    dict_hbond[key]= dict_hbond[key]/ Trajectory.num_frames(self)               
+        self.to_excel(output=output,resume=summary_hbound,numHbound=number_hbond,sheet=sheet, mode=mode)               
     def Dewetting(self,sel1,sel2, first, last):
         dew_vector=[]
         radio_vect=Trajectory.average_radius_of_gyration(self, sel1)
