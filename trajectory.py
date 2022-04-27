@@ -1172,8 +1172,8 @@ class Trajectory:
                  summary_hbound = collections.Counter(summary_hbound)        
                  summary_hbound=summary_hbound+dict_aux    
                             
-        #for key in dict_hbond:
-        #    dict_hbond[key]= dict_hbond[key]/ Trajectory.num_frames(self)               
+        for key in summary_hbound:
+            summary_hbound[key]= (summary_hbound[key]/ Trajectory.num_frames(self)*100)               
         self.to_excel(output=output,resume=summary_hbound,numHbound=number_hbond,sheet=sheet, mode=mode)               
     def Dewetting(self,sel1,sel2, first, last):
         dew_vector=[]
