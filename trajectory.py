@@ -607,7 +607,60 @@ class Trajectory:
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
     
         return ocurrencias_vector/(last-first)
-        
+    def max_insert_residue(self,atomselect1,atomselect2,first,last):
+        """
+        entrega el maximo de residuos insertados
+        """
+        sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=0) 
+        frame_first_insertion=0
+        insert_resid_by_frame={}     
+        for frame in range(first,last):
+             sel1  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+             sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+             resid_center=sel1.centerperresidue()
+            
+                 
+             resid_z=list(map(lambda x: x, resid_center))
+             nameP_z=list(map(lambda x: x[2], sel2.minmax()))
+             membrane=atomsel(selection="resname POPC POPG", molid=self.molID, frame=frame)
+             mem_mass_center_Z=membrane.center(membrane.mass)[2]
+             
+             #outerleaf
+             name_P_down=atomsel(selection=atomselect2+" and z<"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             
+             x_down=np.asarray(name_P_down.x) 
+             y_down=np.asarray(name_P_down.z) 
+             x_down=x_down.transpose() 
+             y_down=y_down.transpose() 
+             p_down = np.polyfit(x_down, y_down, 1)
+             #print (p)
+             #y_down_ajuste = p_down[0]*x_down + p_down[1]
+             
+             #inner leaf
+             name_P_up=atomsel(selection=atomselect2+" and z>"+str(mem_mass_center_Z) ,molid=self.molID, frame=frame)
+             x_up = name_P_up.x
+             y_up = name_P_up.z
+            
+             x_up=np.asarray(x_up) 
+             y_up=np.asarray(y_up) 
+         
+
+             p_up = np.polyfit(x_up, y_up, 1)
+             cont=0
+             for number_resid in range(len(resid_z)):
+                 x_residue=resid_z[number_resid][0]
+                 y_down_ajuste = p_down[0]*x_residue + p_down[1]
+                 y_up_ajuste = p_up[0]*x_residue + p_up[1]
+                 
+                 if resid_z[number_resid][2]<y_up_ajuste and resid_z[number_resid][2]>y_down_ajuste:
+                     cont=cont+1
+             insert_resid_by_frame[str(frame)]=cont
+             #print (ocurrencias_temp)
+             #ocurrencias_temp= np.zeros(len(resid_center))    
+          
+    
+        return max(insert_resid_by_frame.values())
+         
     def insertions_reach_membrane(self,atomselect1,atomselect2,first,last):
         """
         insercion en membrane del residuo a los Posfato de la membrana, tambien devuelve el frame
