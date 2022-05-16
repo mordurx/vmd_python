@@ -471,20 +471,49 @@ class Trajectory:
              #distance_mass_weight.append(np.linalg.norm(sel2_z-sel1_z))
     
         return ocurrencias_vector/Trajectory.num_frames(self)
-    def contact_time(self,atomselect1,atomselect2,cutoff):
+    def contact_tamra(self,atomselect1,atomselect2,cutoff):
+        for frame in range(Trajectory.num_frames(self)):
+             sel  = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+             receptor  = atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+             contact=sel.contacts(receptor,cutoff)
+             if len(contact[1])==0:
+                 print("vacioo")
+                 continue
+             unique_contact=list(set(contact[1]))
+             unique_index = ' '.join([str(elem) for elem in unique_contact])
+             unique_resid = atomsel(selection="index "+unique_index, molid=self.molID, frame=frame)
+             unique_contact=list(set(unique_resid.resid))
+             aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
+     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
+             for atom in unique_contact:
+                        resid = atomsel(selection="resid "+str(atom), molid=self.molID, frame=frame)
+                        resid=list(set(resid.resname))
+                        get_one_letter_amino=aminoacid[resid[0]]
+                        if str(atom)+get_one_letter_amino in dict_resid_count.keys():
+                            #print("existe residuo")
+                            dict_resid_count[str(atom)+get_one_letter_amino]=dict_resid_count[str(atom)+get_one_letter_amino]+1
+                        else:
+                            dict_resid_count[str(atom)+get_one_letter_amino]=1
+        return dict_resid_count 
+
+             
+                 
+    def contact_time(self,ligand,protein,cutoff):
         dict_resid_count={}
         # cuantos contactos tiene un ligando a cierto receptor by cutoff
         
         for frame in range(Trajectory.num_frames(self)):
-             sel  = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
-             receptor  = atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+             sel  = atomsel(selection=ligand, molid=self.molID, frame=frame)
+             receptor  = atomsel(selection=protein, molid=self.molID, frame=frame)
              contact=sel.contacts(receptor,cutoff)
              #la primera lista index del lig
              #segunda lista atom que hacen contacto
              aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H'}
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
              #dejar solo valores unicos, no nos intereza el analisis de enlaces
              if len(contact[1])==0:
                  print("vacioo")
@@ -495,7 +524,7 @@ class Trajectory:
              unique_contact=list(set(unique_resid.resid))
            
              for atom in unique_contact:
-                 resid = atomsel(selection="resid "+str(atom), molid=self.molID, frame=frame)
+                 resid = atomsel(selection="resid "+str(atom) +" and "+protein, molid=self.molID, frame=frame)
                  resid=list(set(resid.resname))
                  get_one_letter_amino=aminoacid[resid[0]]
                  if str(atom)+get_one_letter_amino in dict_resid_count.keys():
