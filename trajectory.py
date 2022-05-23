@@ -116,7 +116,15 @@ class Trajectory:
             #print(np.fromstring(result, dtype=float, sep=' '))
             
         return magnitude_prot_vector,Cosangle,np.degrees(np.arccos(Cosangle)).tolist()
-        
+    def tcl_volmap(self,file_path, maptypes, sel, res, output):
+        #calcula el volmap density promedio y entrega un dx file.
+        #sel1 = atomsel(selection=sel, molid=self.molID)
+        vmd.evaltcl("source "+file_path)
+        print("source "+file_path)
+        print("MapVolVmd"+" "+str(self.molID)+" "+str(maptypes)+" "+f'"{sel}"'+" "+str(res)+" "+str(output))
+        result=vmd.evaltcl("MapVolVmd"+" "+str(self.molID)+" "+str(maptypes)+" "+f'"{sel}"'+" "+str(res)+" "+str(output))
+        #return result
+    
         
     def mean_displacement(self,atomselect1):
        
@@ -1011,15 +1019,21 @@ class Trajectory:
                  
         return ocurrencias_vector
     
-    def rmsd_time(self,atomselect):
+    def rmsd_time(self,atomselect,first=0,last=-1):
          rmsd_array=[]
+         if last==-1:
+            last=Trajectory.num_frames(self)-1
+         if first==-1:
+            first=Trajectory.num_frames(self)
+         else:
+             last=last+1   
          # use frame 0 for the reference
          reference = atomsel(selection=atomselect, molid=self.molID, frame=0) 
          #compare = atomsel(atomselect)
          #set reference [atomselect $mol "protein" frame 0]
          # the frame being compared 
          #set compare [atomselect $mol "protein"]
-         for frame in range(Trajectory.num_frames(self)):
+         for frame in range(first,last):
              #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
               # the frame being compared 
              
