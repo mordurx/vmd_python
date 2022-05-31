@@ -524,7 +524,7 @@ class Trajectory:
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
              #dejar solo valores unicos, no nos intereza el analisis de enlaces
              if len(contact[1])==0:
-                 print("vacioo")
+                 #print("vacioo")
                  continue
              unique_contact=list(set(contact[1]))
              unique_index = ' '.join([str(elem) for elem in unique_contact])
