@@ -540,7 +540,10 @@ class Trajectory:
                      dict_resid_count[str(atom)+get_one_letter_amino]=dict_resid_count[str(atom)+get_one_letter_amino]+1
                  else:
                      dict_resid_count[str(atom)+get_one_letter_amino]=1
-        return dict_resid_count     
+        for i in dict_resid_count.keys():
+            dict_resid_count[i]=dict_resid_count[i]/Trajectory.num_frames(self)
+        sorted_dict = {key: value for key, value in sorted(dict_resid_count.items())}               
+        return sorted_dict     
         
     def porcentaje_contact_fit(self,atomselect1,atomselect2,first,last):
         """
@@ -1089,8 +1092,10 @@ class Trajectory:
             #0.42:0.1805
             #print (np.sum(x[0]))
         return [mean_residues,std_error_residues]
+    
+     
     @staticmethod     
-    def set_beta_factor(residue_occupancy:list, query,molid:int,output:str):
+    def colour_pdb_by_column(sel_res_values:dict, query,molid:int,output:str,colunm='beta'):
         """
         metodo que colorea por beta factor
         residue_occupancy: vector con valores a colocar en beta columm
@@ -1098,10 +1103,32 @@ class Trajectory:
         output "pbd salida"
         molid: id de la proteina  
         """
+        aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
+     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
         protein = atomsel(query)
-        for x in protein.resid:
-            atomsel(query+" and resid "+str(x)).beta=residue_occupancy[x-1]
-            print(x,residue_occupancy[x-1])
+        if colunm=='beta':
+            protein.beta=0
+        elif colunm=='occupancy':
+            protein.occupancy=0                
+        keys=list(sel_res_values.keys())
+        for key, value in sel_res_values.items():
+            resid_letter=key[-1]
+            resid_index=key[:-1]
+            for key_A, value_A in aminoacid.items():
+                if resid_letter== value_A:
+                    if colunm=='beta':
+                        atomsel(query+" and resid "+str(resid_index)+" and resname "+key_A).beta=value
+                    elif colunm=='occupancy':
+                        atomsel(query+" and resid "+str(resid_index)+" and resname "+key_A).occupancy=value
+                    
+                        
+        
+                 
+        #for x in protein.resid:
+        #    atomsel(query+" and resid "+str(x)).beta=residue_occupancy[x-1]
+        #    print(x,residue_occupancy[x-1])
         protein.write("pdb",output)
         print("cerrando molecula ",molid) 
         molecule.delete(molid)        
