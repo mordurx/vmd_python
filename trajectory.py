@@ -7,6 +7,7 @@ Created on Fri Jun 14 15:33:39 2019
 
 @author: eniac
 """
+import natsort
 import collections
 import random
 from numpy import savetxt
@@ -507,7 +508,42 @@ class Trajectory:
         return dict_resid_count 
 
              
-                 
+    def contact_map_protein(self,ligand,receptor,cutoff):
+        dict_resid_count={}
+        summary_hbound={}
+        aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+     'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
+     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
+        # cuantos contactos tiene un ligando a cierto receptor by cutoff
+        for frame in range(Trajectory.num_frames(self)):
+                 sel_1  = atomsel(selection=ligand, molid=self.molID, frame=frame) 
+                 sel_2  = atomsel(selection=receptor, molid=self.molID, frame=frame) 
+                 lig_contact = sel_1.contacts(sel_2,cutoff=cutoff)
+                 #H_bond_vector.append(lig_sel_sasa)
+                 #number_hbond[frame]=0
+                 dict_aux={}
+                 for data in range(len(lig_contact[1])):
+                     sel_A  = atomsel(selection="index "+str(lig_contact[0][data]), molid=self.molID, frame=frame)
+                     sel_B  = atomsel(selection="index "+str(lig_contact[1][data]), molid=self.molID, frame=frame)
+                     #sel_H  = atomsel(selection="index "+str(lig_contact[2][data]), molid=self.molID, frame=frame)
+                     
+                     ligand_atom=str(sel_A.resid[0])+""+str(aminoacid[sel_A.resname[0]])+"--"+str(sel_B.resid[0])+""+str(aminoacid[sel_B.resname[0]])
+                     if ligand_atom not in dict_aux.keys():
+                            dict_aux[ligand_atom]=1
+                     else:
+                         if ligand_atom not in dict_aux.keys():
+                            dict_aux[ligand_atom]=1
+                         
+                 dict_aux = collections.Counter(dict_aux)
+                 summary_hbound = collections.Counter(summary_hbound)        
+                 summary_hbound=summary_hbound+dict_aux    
+        
+        for key in summary_hbound:
+            summary_hbound[key]= (summary_hbound[key]/ Trajectory.num_frames(self)*100)            
+        
+        sorted_dict = dict(collections.OrderedDict(natsort.natsorted(summary_hbound.items())))             
+        return sorted_dict             
     def contact_time(self,ligand,protein,cutoff):
         dict_resid_count={}
         # cuantos contactos tiene un ligando a cierto receptor by cutoff
@@ -542,7 +578,8 @@ class Trajectory:
                      dict_resid_count[str(atom)+get_one_letter_amino]=1
         for i in dict_resid_count.keys():
             dict_resid_count[i]=dict_resid_count[i]/Trajectory.num_frames(self)
-        sorted_dict = {key: value for key, value in sorted(dict_resid_count.items())}               
+        
+        sorted_dict = dict(collections.OrderedDict(natsort.natsorted(dict_resid_count.items())))             
         return sorted_dict     
         
     def porcentaje_contact_fit(self,atomselect1,atomselect2,first,last):
@@ -1260,43 +1297,7 @@ class Trajectory:
         dict_hbond={}
         summary_hbound={}
         number_hbond={}
-        for frame in range(Trajectory.num_frames(self)):
-                 sel_1  = atomsel(selection=donor, molid=self.molID, frame=frame) 
-                 sel_2  = atomsel(selection=aceptor, molid=self.molID, frame=frame) 
-                 lig_sel_sasa = sel_1.hbonds(cutoff=cutoff,maxangle=angle,acceptor=sel_2)
-                 #H_bond_vector.append(lig_sel_sasa)
-                 number_hbond[frame]=0
-                 dict_aux={}
-                 for data in range(len(lig_sel_sasa[1])):
-                     sel_A  = atomsel(selection="index "+str(lig_sel_sasa[0][data]), molid=self.molID, frame=frame)
-                     sel_B  = atomsel(selection="index "+str(lig_sel_sasa[1][data]), molid=self.molID, frame=frame)
-                     sel_H  = atomsel(selection="index "+str(lig_sel_sasa[2][data]), molid=self.molID, frame=frame)
-                     
-                     if water=="acceptor":
-                         ligand_atom=str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"---"+str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"-"+str(sel_A.index[0])
-                     elif water=="donor":
-                         ligand_atom=str(sel_A.resname[0])+"-"+str(sel_A.name[0])+"---"+str(sel_B.resname[0])+"-"+str(sel_B.name[0])+"-"+str(sel_B.index[0])
-                     else:
-                         return print("water, only canbe donor or acceptor")
-                     if only_polar==True:
-                         polar_allowing=['N','O','S','F']
-                         #print ("only polar active",polar_allowing)
-                         if any(x in sel_A.type[0][0] for x in polar_allowing) and any(x in sel_B.type[0][0] for x in polar_allowing):
-                             number_hbond[frame]=number_hbond[frame]+1
-                             if ligand_atom not in dict_aux.keys():
-                                dict_aux[ligand_atom]=1
-                           
-                      
-                     else:
-                         if ligand_atom not in dict_aux.keys():
-                            dict_aux[ligand_atom]=1
-                         number_hbond[frame]=number_hbond[frame]+1
-                 dict_aux = collections.Counter(dict_aux)
-                 summary_hbound = collections.Counter(summary_hbound)        
-                 summary_hbound=summary_hbound+dict_aux    
-                            
-        for key in summary_hbound:
-            summary_hbound[key]= (summary_hbound[key]/ Trajectory.num_frames(self)*100)               
+                       
         self.to_excel(output=output,resume=summary_hbound,numHbound=number_hbond,sheet=sheet, mode=mode)               
     def Dewetting(self,sel1,sel2, first, last):
         dew_vector=[]
