@@ -1,5 +1,3 @@
-
-
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -16,6 +14,7 @@ from vmd import molecule,atomsel,vmdnumpy,animate,trans
 import numpy as np
 import pandas as pd
 import statistics
+import re
 from sklearn import preprocessing
 import vmd
 from sklearn.linear_model import LinearRegression
@@ -125,8 +124,83 @@ class Trajectory:
         print("MapVolVmd"+" "+str(self.molID)+" "+str(maptypes)+" "+f'"{sel}"'+" "+str(res)+" "+str(output))
         result=vmd.evaltcl("MapVolVmd"+" "+str(self.molID)+" "+str(maptypes)+" "+f'"{sel}"'+" "+str(res)+" "+str(output))
         #return result
-    
+    @staticmethod
+    def pair_interaction_energies(energies_file,outputfolder, cutoff=0,request=['ELECT','VDW']):
+        TS=[]
+        ELECT=[]
+        VDW=[]
+        BOND=[]
+        ANGLE=[]
+        DIHED=[]
+        IMPRP=[]
+        KINEC=[]
+        TOTAL=[]
+        phrase='ENERGY:'
+        for line in open(energies_file).readlines():
+            if re.match('ETITLE:', line):
+                head=re.split('\W+',line)
+                #print(head)
+            if re.match(phrase, line):            
+                line_array=re.split(r'/^[+-]?\d+(\.\d+)?$/',line)
+                line_array=line_array[0].split()
+                TS.append(float(line_array[1]))
+                BOND.append(float(line_array[2]))
+                ANGLE.append(float(line_array[3]))
+                DIHED.append(float(line_array[4]))
+                IMPRP.append(float(line_array[5]))
+                ELECT.append(float(line_array[6]))
+                VDW.append(float(line_array[7]))
+                KINEC.append(float(line_array[10]))
+                TOTAL.append(float(line_array[11]))
+        #zipbObj = zip([head[6],head[7],head[1]], [ELECT,VDW,TS])
+        zipbObj = zip([head[1],head[2],head[3],head[4],head[5],head[6],head[7],head[10],head[11]], [TS,BOND,ANGLE,DIHED,IMPRP,ELECT,VDW,KINEC,TOTAL])
+        dictOfWords = dict(zipbObj)
         
+        size=len(dictOfWords["TS"][cutoff:])
+        index=np.linspace(0,size, num=size)
+        x=np.asarray(dictOfWords['ELECT'][cutoff:])
+        print ('ELECT',np.mean(x))
+        x=np.asarray(dictOfWords['VDW'][cutoff:])
+        print ('VDW',np.mean(x))
+        x=np.asarray(dictOfWords['BOND'][cutoff:])
+        print ('BOND',np.mean(x))
+        x=np.asarray(dictOfWords['ANGLE'][cutoff:])
+        print ('ANGLE',np.mean(x))
+        x=np.asarray(dictOfWords['DIHED'][cutoff:])
+        print ('DIHED',np.mean(x))
+        x=np.asarray(dictOfWords['IMPRP'][cutoff:])
+        print ('IMPRP',np.mean(x))
+        x=np.asarray(dictOfWords['KINETIC'][cutoff:])
+        print ('KINETIC',np.mean(x))
+        x=np.asarray(dictOfWords['TOTAL'][cutoff:])
+        print ('TOTAL',np.mean(x))
+        #return file txt
+        if 'ELECT' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['ELECT'][cutoff:])
+            df.to_csv(outputfolder+"/ELECT.txt",index=False,sep='\t',header=False)
+        if 'VDW' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['VDW'][cutoff:])
+            df.to_csv(outputfolder+"/VDW.txt",index=False,sep='\t',header=False)
+        if 'BOND' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['BOND'][cutoff:])
+            df.to_csv(outputfolder+"/BOND.txt",index=False,sep='\t',header=False)
+        if 'ANGLE' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['ANGLE'][cutoff:])
+            df.to_csv(outputfolder+"/ANGLE.txt",index=False,sep='\t',header=False)
+        if 'DIHED' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['DIHED'][cutoff:])
+            df.to_csv(outputfolder+"/DIHED.txt",index=False,sep='\t',header=False)    
+        if 'IMPRP' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['IMPRP'][cutoff:])
+            df.to_csv(outputfolder+"/IMPRP.txt",index=False,sep='\t',header=False)
+        if 'KINETIC' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['KINETIC'][cutoff:])
+            df.to_csv(outputfolder+"/KINETIC.txt",index=False,sep='\t',header=False)
+        if 'TOTAL' in request:
+            df=pd.DataFrame.from_dict(dictOfWords['TOTAL'][cutoff:])
+            df.to_csv(outputfolder+"/TOTAL.txt",index=False,sep='\t',header=False)
+    
+        return dictOfWords   
     def mean_displacement(self,atomselect1):
        
         displacement_x=[]
