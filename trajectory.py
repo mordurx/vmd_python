@@ -19,17 +19,17 @@ from sklearn import preprocessing
 import vmd
 from sklearn.linear_model import LinearRegression
 class Trajectory:
-    def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None,type_format="NAMD"):
+    def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None,traj_format="dcd",top_format="psf"):
         
-        if type_format=="GROMACS":
-            traj_format="xtc"
-            top_format="gro"
-        if type_format=="NAMD":
-            traj_format="dcd"
-            top_format="psf"
-        if type_format=="test":
-            traj_format="dcd"
-            top_format="gro"
+        # if type_format=="GROMACS":
+        #     traj_format="xtc"
+        #     top_format="gro"
+        # if type_format=="NAMD":
+        #     traj_format="dcd"
+        #     top_format="psf"
+        # if type_format=="test":
+        #     traj_format="dcd"
+        #     top_format="gro"
         self.molID=0
         if psf is not None:
                 self.psf = psf
