@@ -1415,6 +1415,25 @@ class Trajectory:
                      print("frame "+str(frame)+"  " +str(protein.center()))
                  dew_vector.append(densidad_agua)
         return dew_vector              
+    def wrap_CG(self,wrapselect,output_traj_trr,output_gro,it):
+        #con evaltcl puedo acceder a la consola tk
+        vmd.evaltcl('package require pbctools')
+        for frame in range(Trajectory.num_frames(self)):
+                i=1
+                for i in range(it):
+                    vmd.evaltcl('pbc wrap -centersel "'+wrapselect+'" -center com  -first '+str(frame)+' -last '+str(frame)+' -molid '+str(self.molID))
+                #vmd.evaltcl('set all2 [atomselect '+str(molID)+ " all " 'frame '+str(frame)+']')
+                sel_all= atomsel(selection="all", molid=self.molID, frame=frame) 
+                sel_all.moveby(-1*np.array((sel_all.center())))
+                #vmd.evaltcl(sel_all+'moveby [vecinvert [measure center'$all']]')
+                #$all moveby [vecinvert [measure center $all]]
+                print('pbc wrap -centersel "not resid 1 to 41 and name BB SC1 SC2 SC3 SC4 SC5" -center com  -first '+str(frame)+' -last '+str(frame)+' -molid '+str(self.molID))
+                if frame==Trajectory.num_frames(self)-1:
+                        molecule.write(self.molID, "gro", output_gro,first=frame,last=frame,stride=1)
+
+                    #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
+        molecule.write(self.molID,'trr',output_traj_trr,first=1,last=-1,stride=1)
+        molecule.cancel
     def pdbs_from_dcd(self,atomselect1,output):
         vector_radio=[]
         for frame in range(Trajectory.num_frames(self)):
