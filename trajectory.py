@@ -471,7 +471,25 @@ class Trajectory:
         molecule.write(self.molID, "pdb",path_output, first=first_frame,last=last_frame)
         return path_output
             
+    def distance_center_massXY(self,atomselect1,atomselect2):
+        distance_mass_weight=[]
+        for frame in range(Trajectory.num_frames(self)):
+            #protein  = atomsel(selection="protein", molid=molid, frame=frame) 
         
+            sel1 =atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
+            sel2 =atomsel(selection=atomselect2, molid=self.molID, frame=frame)
+            
+            
+            sel1_x = np.array((sel1.center(sel1.mass)[0]))
+            sel2_x= np.array((sel2.center(sel2.mass)[0]))
+            
+            sel1_y = np.array((sel1.center(sel1.mass)[1]))
+            sel2_y= np.array((sel2.center(sel2.mass)[1]))
+            
+            
+            dist = np.sqrt((sel2_x - sel1_x)**2 + (sel2_y - sel1_y)**2)  
+            distance_mass_weight.append(dist)
+        return distance_mass_weight        
     def distance_center_mass(self,atomselect1,atomselect2):
         distance_mass_weight=[]
         for frame in range(Trajectory.num_frames(self)):
@@ -581,7 +599,31 @@ class Trajectory:
                             dict_resid_count[str(atom)+get_one_letter_amino]=1
         return dict_resid_count 
 
-             
+    def del_frame_not_contact(self,ligand,receptor,cutoff,output,output_gro,sel):
+        #elimina los frame donde no hubo contacto
+        sel  = atomsel(selection=sel, molid=self.molID)
+        delete_index=False
+        range_frame=range(molecule.get_frame(self.molID))
+        frame=1
+        while frame <= molecule.get_frame(self.molID):
+                 print(molecule.get_frame(self.molID))
+                 print(frame)
+                 #if delete_index==True:
+                     #frame=frame-1
+                 sel_1  = atomsel(selection=ligand, molid=self.molID, frame=frame) 
+                 sel_2  = atomsel(selection=receptor, molid=self.molID, frame=frame) 
+                 lig_contact = sel_1.contacts(sel_2,cutoff=cutoff)
+                 if len(lig_contact[1])==0 or len(lig_contact[0])==0:
+                     print ("delete",frame)
+                     molecule.delframe(self.molID,first=frame,last=frame,stride=0)
+                     
+                 else:
+                    frame=frame+1
+        molecule.write(self.molID, "gro", output_gro,first=molecule.get_frame(self.molID),last=-1,stride=1,selection=sel)    
+        molecule.write(self.molID,'trr',output,first=1,last=-1,stride=1,selection=sel)
+        molecule.cancel             
+
+                 
     def contact_map_protein(self,ligand,receptor,cutoff):
         dict_resid_count={}
         summary_hbound={}
