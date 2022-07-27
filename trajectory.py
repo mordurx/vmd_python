@@ -1414,49 +1414,7 @@ class Trajectory:
         summary_hbound={}
         number_hbond={}
                        
-        self.to_excel(output=output,resume=summary_hbound,numHbound=number_hbond,sheet=sheet, mode=mode)               
-    def Dewetting(self,sel1,sel2, first, last):
-        dew_vector=[]
-        radio_vect=Trajectory.average_radius_of_gyration(self, sel1)
-        print (radio_vect)
-
-        for frame in range(first,last):
-                 protein  = atomsel(selection=sel1, molid=self.molID, frame=frame) 
-                 query_name_p=sel2+" and ( x>= "+str(protein.center()[0]-radio_vect)+" and x<= "+str(protein.center()[0]+radio_vect)+")"
-                 radio_giro=protein.rgyr(protein.mass)
-                 print (radio_giro)
-                 print (query_name_p)
-                 #print (protein.mass)
-                 print (protein.minmax())
-                 zmax=protein.minmax()[0][2]
-                 
-                 name_p  = atomsel(selection=query_name_p, molid=self.molID, frame=frame)
-                 
-                 
-                 print (name_p.minmax())
-                 zmin=name_p.minmax()[1][2]
-                 print (zmin)
-                 x=protein.center(protein.mass)[0]
-                 y=protein.center(protein.mass)[1]
-                 z=protein.center(protein.mass)[2]
-                 cilinder_water= "water and  same residue as (((x-"+str(x)+")^2" +"+(y-"+str(y)+")^2 <="+str(radio_giro)+"^2)and z >="+str(zmin)+" and z <="+str(zmax)+")"
-                 print (cilinder_water)
-                 agua  = atomsel(selection=cilinder_water, molid=self.molID, frame=frame) 
-                 print (len(agua.index))
-                 num_agua=len(agua.index)
-                 h=np.abs(zmin-zmax)
-                 volumen=np.pi*radio_giro**2*h
-                 densidad_agua=num_agua/volumen
-                 #>>> big_sel = atomsel('protein or resname LIG')
-                 #>>> lig_sel = atomsel('resname LIG')
-                 #ligand_in_protein_sasa = big_sel.sasa(srad=1.4, restrict=lig_sel)
-                 #ligand_in_protein_sasa = big_sel.sasa(srad=1.4)
-                 
-                 #ligand_alone_sasa= lig_sel.sasa(srad=1.4, points=True)
-                 if (frame % 1000)==0:
-                     print("frame "+str(frame)+"  " +str(protein.center()))
-                 dew_vector.append(densidad_agua)
-        return dew_vector              
+        self.to_excel(output=output,resume=summary_hbound,numHbound=number_hbond,sheet=sheet, mode=mode)                             
     def wrap_CG(self,wrapselect,output_traj_trr,output_gro,it):
         #con evaltcl puedo acceder a la consola tk
         vmd.evaltcl('package require pbctools')
@@ -1476,12 +1434,28 @@ class Trajectory:
                     #sel1 = atomsel(selection=atomselect1, molid=self.molID, frame=frame)
         molecule.write(self.molID,'trr',output_traj_trr,first=1,last=-1,stride=1)
         molecule.cancel
-    def pdbs_from_dcd(self,atomselect1,output):
-        vector_radio=[]
-        for frame in range(Trajectory.num_frames(self)):
+    @staticmethod    
+    def gro_to_pdb(gro,output,atomselect_rec="protein",atomselect_lig="not protein",fixchain=False):
+        molID=molecule.load('gro',gro) 
+        receptor  = atomsel(selection=atomselect_rec, molid=molID) 
+        lig  = atomsel(selection=atomselect_lig, molid=self.molID) 
+        all_complex  = atomsel(selection="all", molid=self.molID) 
+        if fixchain==True:
+                receptor.chain='R'
+                lig.chain='L'
+                
+        all_complex.write(format,outputfolder+"frame"+str(frame)+"."+format)  
             
-            #protein  = atomsel(selection=atomselect1, molid=self.molID, frame=frame) 
-            #last_frame = molecule.numframes - 1
-            #atomsel.write()
-            molecule.write(self.molID, "pdb", "last_frame.pdb", first=frame)
-            #vector_radio.append(radio_giro)
+    def get_ligan_receptor_pose_from_traj(self,atomselect_lig,atomselect_rec,outputfolder,fixchain,format='pdb'):
+        pdb_vector=[]
+        for frame in range(Trajectory.num_frames(self)):
+            receptor  = atomsel(selection=atomselect_rec, molid=self.molID ,frame=frame) 
+            lig  = atomsel(selection=atomselect_lig, molid=self.molID,frame=frame) 
+            all_complex  = atomsel(selection="all", molid=self.molID,frame=frame)
+            if fixchain==True:
+                receptor.chain='R'
+                lig.chain='L'
+                
+            all_complex.write(format,outputfolder+"frame"+str(frame)+"."+format)
+            pdb_vector.append(outputfolder+"frame"+str(frame)+"."+format)
+        return pdb_vector    
