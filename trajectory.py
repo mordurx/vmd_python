@@ -5,6 +5,8 @@ Created on Fri Jun 14 15:33:39 2019
 
 @author: eniac
 """
+import os
+import glob
 import natsort
 import collections
 import random
@@ -18,6 +20,7 @@ import re
 from sklearn import preprocessing
 import vmd
 from sklearn.linear_model import LinearRegression
+from pathlib2 import Path
 class Trajectory:
     def __init__(self,dcd=None,psf=None,first=0,last=-1,stride=1,waitfor=-1,pdb=None,traj_format="dcd",top_format="psf"):
         
@@ -1435,18 +1438,34 @@ class Trajectory:
         molecule.write(self.molID,'trr',output_traj_trr,first=1,last=-1,stride=1)
         molecule.cancel
     @staticmethod    
+    def pdb_to_traj(folder_pdb_input,name_output,folder_pdb_output,format_traj_output='pdb',format_pdb_input='pdb',psf_gro_file=None):
+        #convierte una carpeta de pdb o gro a una trajectoria, la trayectoria puede ser de pdb o gro o dcd
+        path_output=os.path.join(folder_pdb_output, name_output)
+        path_input=os.path.join(folder_pdb_input)
+        pattern_to_found=os.path.join(path_input,'*.'+format_pdb_input)
+        array_pdb=glob.glob(pattern_to_found)
+        
+        molID=molecule.new('pdb')
+        for pdb in array_pdb:
+            molecule.read(molID,filetype=format_pdb_input,filename=pdb)
+        molecule.write(molid =molID,filetype=format_traj_output,filename=path_output) 
+        molecule.delete(molID)
+        
+    
+    @staticmethod    
     def gro_to_pdb(gro,output,atomselect_rec="protein",atomselect_lig="not protein",fixchain=False):
         molID=molecule.load('gro',gro) 
         receptor  = atomsel(selection=atomselect_rec, molid=molID) 
-        lig  = atomsel(selection=atomselect_lig, molid=self.molID) 
-        all_complex  = atomsel(selection="all", molid=self.molID) 
+        lig  = atomsel(selection=atomselect_lig, molid=molID) 
+        all_complex  = atomsel(selection="all", molid=molID) 
         if fixchain==True:
                 receptor.chain='R'
                 lig.chain='L'
-                
-        all_complex.write(format,outputfolder+"frame"+str(frame)+"."+format)  
+        all_complex.write('pdb',output)  
+        molecule.delete(molID)        
             
     def get_ligan_receptor_pose_from_traj(self,atomselect_lig,atomselect_rec,outputfolder,fixchain,format='pdb'):
+        #a partir de la trajectoria genera pdb
         pdb_vector=[]
         for frame in range(Trajectory.num_frames(self)):
             receptor  = atomsel(selection=atomselect_rec, molid=self.molID ,frame=frame) 
@@ -1455,7 +1474,11 @@ class Trajectory:
             if fixchain==True:
                 receptor.chain='R'
                 lig.chain='L'
-                
             all_complex.write(format,outputfolder+"frame"+str(frame)+"."+format)
+            path = Path(outputfolder+"frame"+str(frame)+"."+format)
+            text = path.read_text()
+            text = text.replace('HSE', 'HIS')
+            text = text.replace('HSP', 'HIS')
+            path.write_text(text)    
             pdb_vector.append(outputfolder+"frame"+str(frame)+"."+format)
         return pdb_vector    
