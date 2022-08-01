@@ -1463,22 +1463,31 @@ class Trajectory:
                 lig.chain='L'
         all_complex.write('pdb',output)  
         molecule.delete(molID)        
-            
-    def get_ligan_receptor_pose_from_traj(self,atomselect_lig,atomselect_rec,outputfolder,fixchain,format='pdb'):
+    def traj_to_pdb(self,outputfolder,output_format,name_output,atomselect_lig,atomselect_rec,fixchain=False):
         #a partir de la trajectoria genera pdb
         pdb_vector=[]
         for frame in range(Trajectory.num_frames(self)):
-            receptor  = atomsel(selection=atomselect_rec, molid=self.molID ,frame=frame) 
-            lig  = atomsel(selection=atomselect_lig, molid=self.molID,frame=frame) 
+            path_output=os.path.join(outputfolder, name_output+str(frame)+"."+output_format)
+        
             all_complex  = atomsel(selection="all", molid=self.molID,frame=frame)
             if fixchain==True:
+                receptor  = atomsel(selection=atomselect_rec, molid=self.molID ,frame=frame) 
+                lig  = atomsel(selection=atomselect_lig, molid=self.molID,frame=frame) 
                 receptor.chain='R'
                 lig.chain='L'
-            all_complex.write(format,outputfolder+"frame"+str(frame)+"."+format)
-            path = Path(outputfolder+"frame"+str(frame)+"."+format)
-            text = path.read_text()
-            text = text.replace('HSE', 'HIS')
-            text = text.replace('HSP', 'HIS')
-            path.write_text(text)    
-            pdb_vector.append(outputfolder+"frame"+str(frame)+"."+format)
-        return pdb_vector    
+                
+            all_complex.write(output_format,path_output)
+            pdb_vector.append(path_output)
+        return pdb_vector
+    @staticmethod 
+    def reformat_pdb(pdb):
+        path = Path(pdb)
+        text = path.read_text()
+        text = text.replace('HSE', 'HIS')
+        text = text.replace('HSP', 'HIS')
+        text = text.replace('CD  ILE', 'CD1 ILE')
+        text = text.replace('OT1 GLN', 'O   GLN')
+        text = text.replace('OT2 GLN', 'OXT GLN')
+        text = text.replace('OT1 ASP', 'O   ASP')
+        text = text.replace('OT2 ASP', 'OXT ASP')
+        path.write_text(text)    
