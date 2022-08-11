@@ -603,7 +603,8 @@ class Trajectory:
         return dict_resid_count 
 
     def del_frame_not_contact(self,ligand,receptor,cutoff,output,output_gro,sel):
-        #elimina los frame donde no hubo contacto
+        """elimina los frame donde no hubo contacto
+        """
         sel  = atomsel(selection=sel, molid=self.molID)
         delete_index=False
         range_frame=range(molecule.get_frame(self.molID))
@@ -1490,4 +1491,29 @@ class Trajectory:
         text = text.replace('OT2 GLN', 'OXT GLN')
         text = text.replace('OT1 ASP', 'O   ASP')
         text = text.replace('OT2 ASP', 'OXT ASP')
-        path.write_text(text)    
+        path.write_text(text)
+    def rmsd_matrix(self,atomselect,file_name):
+        """genera una matriz de rmds"""
+        rmsd_array=[]
+        matrix=[]
+        # use frame 0 for the reference
+        
+        
+        for frame in range(Trajectory.num_frames(self)):
+            reference = atomsel(selection=atomselect, molid=self.molID, frame=frame)
+            rmsd_array=[]
+            for frame in range(Trajectory.num_frames(self)):
+                reference2 = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
+                #set trans_mat [measure fit $compare $reference]
+                trans_mat=atomsel.fit(reference2,reference)
+                # do the alignment
+                #compare.move(trans_mat)
+                reference2.move(trans_mat)
+                #$compare move $trans_mat
+                # compute the RMSD
+                #set rmsd [measure rmsd $compare $reference]
+                rmsd_array.append(atomsel.rmsd(reference2,reference))
+            matrix.append(rmsd_array)    
+        df = pd.DataFrame(matrix)
+        df.to_csv(file_name, sep='\t', index = None, header=False)
+        return df        
