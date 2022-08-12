@@ -70,6 +70,7 @@ class Trajectory:
         except IOError:
             print ("Could not read dcd file or psf:", dcd)
             raise Exception()
+    @classmethod    
     def pdb(self,pdb,psf=None):
         #sobrecarga para leer pdbs y no dcd
         try:
@@ -83,6 +84,7 @@ class Trajectory:
         except IOError:
             print ("Could not read dcd file or psf:",pdb)
             raise Exception()
+        return self.molID
     
     def get_pdb_path(self):
         return self.pdb
@@ -1492,18 +1494,23 @@ class Trajectory:
         text = text.replace('OT1 ASP', 'O   ASP')
         text = text.replace('OT2 ASP', 'OXT ASP')
         path.write_text(text)
-    def rmsd_matrix(self,atomselect,file_name):
+    def rmsd_matrix(self,atomselect,file_name,ref=None):
         """genera una matriz de rmds"""
         rmsd_array=[]
         matrix=[]
         # use frame 0 for the reference
         
-        
-        for frame in range(Trajectory.num_frames(self)):
-            reference = atomsel(selection=atomselect, molid=self.molID, frame=frame)
+        if ref==None:
+            reference = atomsel(selection=atomselect, molid=self.molID, frame=0)
+        else:
+            reference = atomsel(selection=atomselect, molid=ref)    
+            
+        for frame_row in range(Trajectory.num_frames(self)):
             rmsd_array=[]
-            for frame in range(Trajectory.num_frames(self)):
-                reference2 = atomsel(selection=atomselect, molid=self.molID, frame=frame) 
+            
+            for frame_col in range(frame_row,Trajectory.num_frames(self)):
+                
+                reference2 = atomsel(selection=atomselect, molid=self.molID, frame=frame_col) 
                 #set trans_mat [measure fit $compare $reference]
                 trans_mat=atomsel.fit(reference2,reference)
                 # do the alignment
@@ -1512,8 +1519,9 @@ class Trajectory:
                 #$compare move $trans_mat
                 # compute the RMSD
                 #set rmsd [measure rmsd $compare $reference]
-                rmsd_array.append(atomsel.rmsd(reference2,reference))
-            matrix.append(rmsd_array)    
+                matrix.append(int(atomsel.rmsd(reference2,reference)*1000))
+            #matrix.append(rmsd_array)
+            reference=atomsel(selection=atomselect, molid=self.molID, frame=frame_row)     
         df = pd.DataFrame(matrix)
         df.to_csv(file_name, sep='\t', index = None, header=False)
         return df        
