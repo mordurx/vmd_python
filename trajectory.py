@@ -633,12 +633,13 @@ class Trajectory:
     def contact_map_protein(self,ligand,receptor,cutoff):
         dict_resid_count={}
         summary_hbound={}
-        aminoacid = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+        aminoacid = {'HSD': 'H','CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
      'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M','HSE': 'H','TMR':'TMR'}
         # cuantos contactos tiene un ligando a cierto receptor by cutoff
         for frame in range(Trajectory.num_frames(self)):
+                 print (frame)
                  sel_1  = atomsel(selection=ligand, molid=self.molID, frame=frame) 
                  sel_2  = atomsel(selection=receptor, molid=self.molID, frame=frame) 
                  lig_contact = sel_1.contacts(sel_2,cutoff=cutoff)
